@@ -233,7 +233,7 @@ def test_unterminated_string():
     with pytest.raises(ScannerError) as exc_info:
         scanner.scan_tokens()
 
-    exc_info.type == ScannerErrorType.UNTERMINATED_STRING
+    assert exc_info.value.type == ScannerErrorType.UNTERMINATED_STRING
 
 
 def test_unexpected_character():
@@ -242,4 +242,4 @@ def test_unexpected_character():
     with pytest.raises(ScannerError) as exc_info:
         scanner.scan_tokens()
 
-    exc_info.type == ScannerErrorType.UNTERMINATED_STRING
+    assert exc_info.value.type == ScannerErrorType.UNEXPECTED_CHARACTER

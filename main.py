@@ -30,8 +30,9 @@ def run_file(file_path: str):
 
 
 def run(source: str):
+    scanner = Scanner(source)
+
     try:
-        scanner = Scanner(source)
         scanner.scan_tokens()
     except ScannerError as e:
         display_error(e.line, e.location, e.type.value)
