@@ -1,8 +1,8 @@
 from typing import List
 import pytest
+from plox.exceptions import ScannerError, ScannerErrorType
 from plox.scanner import Scanner
-from plox.token import Token
-from plox.token_types import TokenType
+from plox.token import Token, TokenType
 
 
 def match_tokens(expected: List[Token], scanned: List[Token]) -> bool:
@@ -225,3 +225,21 @@ def test_multiple_lines_with_comments():
     scanner.scan_tokens()
 
     assert match_tokens(expected, scanner.tokens)
+
+
+def test_unterminated_string():
+    scanner = Scanner("\"abc")
+
+    with pytest.raises(ScannerError) as exc_info:
+        scanner.scan_tokens()
+
+    exc_info.type == ScannerErrorType.UNTERMINATED_STRING
+
+
+def test_unexpected_character():
+    scanner = Scanner("var @count = 1;")
+
+    with pytest.raises(ScannerError) as exc_info:
+        scanner.scan_tokens()
+
+    exc_info.type == ScannerErrorType.UNTERMINATED_STRING

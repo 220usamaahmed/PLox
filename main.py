@@ -1,6 +1,8 @@
 import sys
+from plox.exceptions import ScannerError
 
 from plox.scanner import Scanner
+from plox.utils import display_error
 
 
 def run_repl():
@@ -28,8 +30,11 @@ def run_file(file_path: str):
 
 
 def run(source: str):
-    scanner = Scanner(source)
-    scanner.scan_tokens()
+    try:
+        scanner = Scanner(source)
+        scanner.scan_tokens()
+    except ScannerError as e:
+        display_error(e.line, e.location, e.type.value)
 
     for token in scanner.tokens:
         print(f"token: {token.line}\t{token.token_type} - {token.lexeme}")

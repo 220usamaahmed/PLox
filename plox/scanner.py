@@ -1,7 +1,6 @@
 from typing import List
-from plox.token import Token
-from plox.token_types import TokenType
-from plox.utils import display_error
+from plox.exceptions import ScannerError, ScannerErrorType
+from plox.token import Token, TokenType
 
 
 class Scanner():
@@ -71,7 +70,8 @@ class Scanner():
                     self.match_identifier_or_reserved_word()
                 else:
                     self.had_error = True
-                    display_error(self.line, "Unexpected character.")
+                    raise ScannerError(
+                        self.line, "", ScannerErrorType.UNEXPECTED_CHARACTER)
 
     def advance(self) -> str:
         character = self.source[self.current]
@@ -94,8 +94,9 @@ class Scanner():
             self.advance()
 
         if self.is_at_end():
-            display_error(self.line, "Unterminated string.")
-            return
+            self.had_error = True
+            raise ScannerError(
+                self.line, "", ScannerErrorType.UNTERMINATED_STRING)
 
         self.advance()
 
