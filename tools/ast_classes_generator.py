@@ -5,14 +5,14 @@ from typing import List, Literal, Tuple
 
 OUTPUT_PATH = "../plox/ast/"
 EXPRESSIONS: List[Tuple[str, str]] = [
-    ("Assign", "name: Token, expr: Expr"),
+    ("Assign", "name: Token, value: Expr"),
     ("Binary", "left: Expr, operator: Token, right: Expr"),
     ("Call", "callee: Expr, paren: Token, params: List[Expr]"),
     ("Get", "object: Expr, name: Token"),
     ("Grouping", "expression: Expr"),
-    ("Literal", "expr: object"),
+    ("Literal", "value: object"),
     ("Logical", "left: Expr, operator: Token, right: Expr"),
-    ("Set", "object: Expr, name: Token, expr: Expr"),
+    ("Set", "object: Expr, name: Token, value: Expr"),
     ("Super", "keyword: Token, method: Token"),
     ("This", "keyword: Token"),
     ("Unary", "operator: Token, right: Expr"),
@@ -34,10 +34,12 @@ STATEMENTS: List[Tuple[str, str]] = [
 
 def generate_expr_types(content_type: Literal["Expr", "Stmt"], content: List[Tuple[str, str]]):
     code = f"""
-        from typing import List
+        from typing import TYPE_CHECKING, List
         from plox.token import Token
-        from plox.ast.{content_type.lower()}_visitor import {content_type}Visitor
         from plox.ast.expr_interface import Expr
+
+        if TYPE_CHECKING:
+            from plox.ast.{content_type.lower()}_visitor import {content_type}Visitor
     """
 
     class_code = ""
@@ -52,8 +54,8 @@ def generate_expr_types(content_type: Literal["Expr", "Stmt"], content: List[Tup
             class_code += f"{' ' * 8}self.{param} = {param}\n"
 
         class_code += textwrap.indent(textwrap.dedent(f"""
-            def accept(self, visitor: {content_type}Visitor):
-                visitor.visit_{name.lower()}_{content_type.lower()}(self)
+            def accept(self, visitor: '{content_type}Visitor'):
+                return visitor.visit_{name.lower()}_{content_type.lower()}(self)
         """), "    ")
 
         class_code += "\n"
@@ -71,6 +73,7 @@ def generate_expr_visitor(content_type: Literal["Expr", "Stmt"], content: List[T
     imports = ", ".join(map(lambda x: x[0], content))
     code = f"""
         from plox.ast.{content_type.lower()}_types import {imports}
+        from typing import Any
 
 
         class {content_type}Visitor: 
@@ -78,7 +81,7 @@ def generate_expr_visitor(content_type: Literal["Expr", "Stmt"], content: List[T
 
     for name, params in content:
         code += f"""
-            def visit_{name.lower()}_{content_type.lower()}(self, {content_type.lower()}: {name}):
+            def visit_{name.lower()}_{content_type.lower()}(self, {content_type.lower()}: {name}) -> Any:
                 raise Exception('visit_{name.lower()}_{content_type.lower()}({params}) not implemented')
 
         """
@@ -89,12 +92,14 @@ def generate_expr_visitor(content_type: Literal["Expr", "Stmt"], content: List[T
 
 def generate_expr_interface(content_type: Literal["Expr", "Stmt"], content: List[Tuple[str, str]]):
     code = textwrap.dedent(f"""
-        from plox.ast.{content_type.lower()}_visitor import {content_type}Visitor
+        from typing import TYPE_CHECKING, Any
+        if TYPE_CHECKING:
+            from plox.ast.{content_type.lower()}_visitor import {content_type}Visitor
 
                               
         class {content_type}:
 
-            def accept(self, visitor: {content_type}Visitor) -> None:
+            def accept(self, visitor: '{content_type}Visitor') -> Any:
                 raise Exception('accept(visitor: {content_type}Visitor) is not implemented')
     """).strip()
 

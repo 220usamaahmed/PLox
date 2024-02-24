@@ -1,17 +1,19 @@
-from typing import List
+from typing import TYPE_CHECKING, List
 from plox.token import Token
-from plox.ast.expr_visitor import ExprVisitor
 from plox.ast.expr_interface import Expr
+
+if TYPE_CHECKING:
+    from plox.ast.expr_visitor import ExprVisitor
 
 
 class Assign(Expr):
 
-    def __init__(self, name: Token, expr: Expr):      
+    def __init__(self, name: Token, value: Expr):      
         self.name = name
-        self.expr = expr
+        self.value = value
 
-    def accept(self, visitor: ExprVisitor):
-        visitor.visit_assign_expr(self)
+    def accept(self, visitor: 'ExprVisitor'):
+        return visitor.visit_assign_expr(self)
 
 
 class Binary(Expr):
@@ -21,8 +23,8 @@ class Binary(Expr):
         self.operator = operator
         self.right = right
 
-    def accept(self, visitor: ExprVisitor):
-        visitor.visit_binary_expr(self)
+    def accept(self, visitor: 'ExprVisitor'):
+        return visitor.visit_binary_expr(self)
 
 
 class Call(Expr):
@@ -32,8 +34,8 @@ class Call(Expr):
         self.paren = paren
         self.params = params
 
-    def accept(self, visitor: ExprVisitor):
-        visitor.visit_call_expr(self)
+    def accept(self, visitor: 'ExprVisitor'):
+        return visitor.visit_call_expr(self)
 
 
 class Get(Expr):
@@ -42,8 +44,8 @@ class Get(Expr):
         self.object = object
         self.name = name
 
-    def accept(self, visitor: ExprVisitor):
-        visitor.visit_get_expr(self)
+    def accept(self, visitor: 'ExprVisitor'):
+        return visitor.visit_get_expr(self)
 
 
 class Grouping(Expr):
@@ -51,17 +53,17 @@ class Grouping(Expr):
     def __init__(self, expression: Expr):      
         self.expression = expression
 
-    def accept(self, visitor: ExprVisitor):
-        visitor.visit_grouping_expr(self)
+    def accept(self, visitor: 'ExprVisitor'):
+        return visitor.visit_grouping_expr(self)
 
 
 class Literal(Expr):
 
-    def __init__(self, expr: object):      
-        self.expr = expr
+    def __init__(self, value: object):      
+        self.value = value
 
-    def accept(self, visitor: ExprVisitor):
-        visitor.visit_literal_expr(self)
+    def accept(self, visitor: 'ExprVisitor'):
+        return visitor.visit_literal_expr(self)
 
 
 class Logical(Expr):
@@ -71,19 +73,19 @@ class Logical(Expr):
         self.operator = operator
         self.right = right
 
-    def accept(self, visitor: ExprVisitor):
-        visitor.visit_logical_expr(self)
+    def accept(self, visitor: 'ExprVisitor'):
+        return visitor.visit_logical_expr(self)
 
 
 class Set(Expr):
 
-    def __init__(self, object: Expr, name: Token, expr: Expr):      
+    def __init__(self, object: Expr, name: Token, value: Expr):      
         self.object = object
         self.name = name
-        self.expr = expr
+        self.value = value
 
-    def accept(self, visitor: ExprVisitor):
-        visitor.visit_set_expr(self)
+    def accept(self, visitor: 'ExprVisitor'):
+        return visitor.visit_set_expr(self)
 
 
 class Super(Expr):
@@ -92,8 +94,8 @@ class Super(Expr):
         self.keyword = keyword
         self.method = method
 
-    def accept(self, visitor: ExprVisitor):
-        visitor.visit_super_expr(self)
+    def accept(self, visitor: 'ExprVisitor'):
+        return visitor.visit_super_expr(self)
 
 
 class This(Expr):
@@ -101,8 +103,8 @@ class This(Expr):
     def __init__(self, keyword: Token):      
         self.keyword = keyword
 
-    def accept(self, visitor: ExprVisitor):
-        visitor.visit_this_expr(self)
+    def accept(self, visitor: 'ExprVisitor'):
+        return visitor.visit_this_expr(self)
 
 
 class Unary(Expr):
@@ -111,8 +113,8 @@ class Unary(Expr):
         self.operator = operator
         self.right = right
 
-    def accept(self, visitor: ExprVisitor):
-        visitor.visit_unary_expr(self)
+    def accept(self, visitor: 'ExprVisitor'):
+        return visitor.visit_unary_expr(self)
 
 
 class Variable(Expr):
@@ -120,6 +122,6 @@ class Variable(Expr):
     def __init__(self, name: Token):      
         self.name = name
 
-    def accept(self, visitor: ExprVisitor):
-        visitor.visit_variable_expr(self)
+    def accept(self, visitor: 'ExprVisitor'):
+        return visitor.visit_variable_expr(self)
 

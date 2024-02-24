@@ -1,7 +1,9 @@
-from typing import List
+from typing import TYPE_CHECKING, List
 from plox.token import Token
-from plox.ast.stmt_visitor import StmtVisitor
 from plox.ast.expr_interface import Expr
+
+if TYPE_CHECKING:
+    from plox.ast.stmt_visitor import StmtVisitor
 from plox.ast.stmt_interface import Stmt
 from plox.ast.expr_types import Variable
 
@@ -11,8 +13,8 @@ class Block(Stmt):
     def __init__(self, statements: List[Stmt]):      
         self.statements = statements
 
-    def accept(self, visitor: StmtVisitor):
-        visitor.visit_block_stmt(self)
+    def accept(self, visitor: 'StmtVisitor'):
+        return visitor.visit_block_stmt(self)
 
 
 class Function(Stmt):
@@ -22,8 +24,8 @@ class Function(Stmt):
         self.params = params
         self.body = body
 
-    def accept(self, visitor: StmtVisitor):
-        visitor.visit_function_stmt(self)
+    def accept(self, visitor: 'StmtVisitor'):
+        return visitor.visit_function_stmt(self)
 
 
 class Class(Stmt):
@@ -33,8 +35,8 @@ class Class(Stmt):
         self.superclass = superclass
         self.method = method
 
-    def accept(self, visitor: StmtVisitor):
-        visitor.visit_class_stmt(self)
+    def accept(self, visitor: 'StmtVisitor'):
+        return visitor.visit_class_stmt(self)
 
 
 class Expression(Stmt):
@@ -42,8 +44,8 @@ class Expression(Stmt):
     def __init__(self, expression: Expr):      
         self.expression = expression
 
-    def accept(self, visitor: StmtVisitor):
-        visitor.visit_expression_stmt(self)
+    def accept(self, visitor: 'StmtVisitor'):
+        return visitor.visit_expression_stmt(self)
 
 
 class If(Stmt):
@@ -53,8 +55,8 @@ class If(Stmt):
         self.thenBranch = thenBranch
         self.elseBranch = elseBranch
 
-    def accept(self, visitor: StmtVisitor):
-        visitor.visit_if_stmt(self)
+    def accept(self, visitor: 'StmtVisitor'):
+        return visitor.visit_if_stmt(self)
 
 
 class Print(Stmt):
@@ -62,8 +64,8 @@ class Print(Stmt):
     def __init__(self, expression: Expr):      
         self.expression = expression
 
-    def accept(self, visitor: StmtVisitor):
-        visitor.visit_print_stmt(self)
+    def accept(self, visitor: 'StmtVisitor'):
+        return visitor.visit_print_stmt(self)
 
 
 class Return(Stmt):
@@ -72,8 +74,8 @@ class Return(Stmt):
         self.keyword = keyword
         self.expr = expr
 
-    def accept(self, visitor: StmtVisitor):
-        visitor.visit_return_stmt(self)
+    def accept(self, visitor: 'StmtVisitor'):
+        return visitor.visit_return_stmt(self)
 
 
 class VariableDeclaration(Stmt):
@@ -82,8 +84,8 @@ class VariableDeclaration(Stmt):
         self.name = name
         self.initializer = initializer
 
-    def accept(self, visitor: StmtVisitor):
-        visitor.visit_variabledeclaration_stmt(self)
+    def accept(self, visitor: 'StmtVisitor'):
+        return visitor.visit_variabledeclaration_stmt(self)
 
 
 class While(Stmt):
@@ -92,6 +94,6 @@ class While(Stmt):
         self.condition = condition
         self.body = body
 
-    def accept(self, visitor: StmtVisitor):
-        visitor.visit_while_stmt(self)
+    def accept(self, visitor: 'StmtVisitor'):
+        return visitor.visit_while_stmt(self)
 
