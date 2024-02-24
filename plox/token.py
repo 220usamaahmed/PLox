@@ -63,6 +63,9 @@ class Token:
         return f"{self.line}: {self.token_type} - {self.lexeme}"
 
     def __eq__(self, __value: object) -> bool:
+        if not isinstance(__value, Token):
+            return False
+
         return (self.token_type == __value.token_type and
                 self.lexeme == __value.lexeme and
                 self.line == __value.line)
