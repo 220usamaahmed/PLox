@@ -8,6 +8,31 @@ from plox.token import Token, TokenType
 
 class Interpreter(ExprVisitor):
 
+    def __init__(self):
+        self.had_runtime_error = False
+
+    def interpret(self, expression: Expr):
+        try:
+            return self.stringify(self.evaluate(expression))
+        except PLoxRuntimeError as e:
+            self.handle_runtime_error(e)
+
+    def stringify(self, object: Any) -> str:
+        if object == None:
+            return "nil"
+
+        if isinstance(object, float):
+            text = str(object)
+            if text.endswith(".0"):
+                text = text[:-2]
+            return text
+
+        return str(object)
+
+    def handle_runtime_error(self, error: PLoxRuntimeError):
+        self.had_runtime_error = True
+        print(f"[line {error.token.line}] {error.message}")
+
     def visit_literal_expr(self, expr: Literal) -> Any:
         return expr.value
 
