@@ -1,8 +1,10 @@
 import sys
-from plox.exceptions import ScannerError
+from plox.exceptions import ParserError, ScannerError
+from plox.parser import Parser
 
 from plox.scanner import Scanner
 from plox.utils import display_error
+from tools.pretty_printer import ASTPrettyPrinter
 
 
 def run_repl():
@@ -33,12 +35,22 @@ def run(source: str):
     scanner = Scanner(source)
 
     try:
-        scanner.scan_tokens()
+        tokens = scanner.scan_tokens()
+        for token in scanner.tokens:
+            print(f"token: {token.line}\t{token.token_type} - {token.lexeme}")
+
+        parser = Parser(tokens)
+        expression = parser.parse()
+
+        print(expression)
+
+        print(ASTPrettyPrinter().print(expression))
+
     except ScannerError as e:
         display_error(e.line, e.location, e.type.value)
 
-    for token in scanner.tokens:
-        print(f"token: {token.line}\t{token.token_type} - {token.lexeme}")
+    except ParserError as e:
+        display_error(e.line, e.location, e.type.value)
 
 
 def main():
