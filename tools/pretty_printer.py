@@ -34,7 +34,7 @@ class ASTPrettyPrinter(ExprVisitor):
         return self.parenthesize("group", expr.expression)
 
     def visit_literal_expr(self, expr: Literal):
-        return expr.value
+        return str(expr.value)
 
     def visit_logical_expr(self, expr: Logical):
         raise Exception(
