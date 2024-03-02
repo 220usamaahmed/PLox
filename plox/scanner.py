@@ -150,7 +150,13 @@ class Scanner():
 
     def add_token(self, token_type: TokenType):
         text = self.source[self.start:self.current]
-        self.tokens.append(Token(token_type, text, self.line))
+        value = None
+        if token_type == TokenType.NUMBER:
+            value = float(text)
+        elif token_type == TokenType.STRING:
+            value = text
+
+        self.tokens.append(Token(token_type, text, self.line, value))
 
     def is_at_end(self) -> bool:
         return self.current >= len(self.source)

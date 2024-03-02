@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Optional
 
 
 class TokenType(Enum):
@@ -54,10 +55,11 @@ class TokenType(Enum):
 
 class Token:
 
-    def __init__(self, token_type: TokenType, lexeme: str, line: int):
+    def __init__(self, token_type: TokenType, lexeme: str, line: int, value: Optional[object] = None):
         self.token_type = token_type
         self.lexeme = lexeme
         self.line = line
+        self.value = value
 
     def __repr__(self) -> str:
         return f"{self.line}: {self.token_type} - {self.lexeme}"

@@ -87,7 +87,7 @@ class Parser:
             return Literal(None)
 
         if self.match(TokenType.NUMBER, TokenType.STRING):
-            return Literal(self.previous().lexeme)
+            return Literal(self.previous().value)
 
         if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()

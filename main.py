@@ -1,5 +1,6 @@
 import sys
 from plox.exceptions import ParserError, ScannerError
+from plox.interpreter import Interpreter
 from plox.parser import Parser
 
 from plox.scanner import Scanner
@@ -41,10 +42,11 @@ def run(source: str):
 
         parser = Parser(tokens)
         expression = parser.parse()
-
-        print(expression)
-
         print(ASTPrettyPrinter().print(expression))
+
+        interpretor = Interpreter()
+        result = interpretor.evaluate(expression)
+        print(result)
 
     except ScannerError as e:
         display_error(e.line, e.location, e.type.value)
