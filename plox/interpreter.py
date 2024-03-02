@@ -16,7 +16,7 @@ class Interpreter(ExprVisitor):
             result = self.evaluate(expression)
             return self.stringify(result)
         except PLoxRuntimeError as e:
-            self.handle_runtime_error(e)
+            return self.handle_runtime_error(e)
 
     def stringify(self, object: Any) -> str:
         if object == None:
@@ -30,9 +30,9 @@ class Interpreter(ExprVisitor):
 
         return str(object)
 
-    def handle_runtime_error(self, error: PLoxRuntimeError):
+    def handle_runtime_error(self, error: PLoxRuntimeError) -> str:
         self.had_runtime_error = True
-        print(f"[line {error.token.line}] {error.message}")
+        return f"[line {error.token.line}] {error.message}"
 
     def visit_literal_expr(self, expr: Literal) -> Any:
         return expr.value
