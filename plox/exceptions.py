@@ -1,5 +1,7 @@
 from enum import Enum
 
+from plox.token import Token
+
 
 class ScannerErrorType(Enum):
 
@@ -9,7 +11,7 @@ class ScannerErrorType(Enum):
 
 class ScannerError(Exception):
 
-    def __init__(self, line: int, location: str, type: ScannerErrorType) -> None:
+    def __init__(self, line: int, location: str, type: ScannerErrorType):
         super().__init__(f"[{line}]: {type}")
 
         self.line = line
@@ -41,7 +43,16 @@ class InterpreterErrorType(Enum):
 
 class InterpreterError(Exception):
 
-    def __init__(self, type: InterpreterErrorType) -> None:
+    def __init__(self, type: InterpreterErrorType):
         super().__init__(type.value)
 
         self.type = type
+
+
+class PLoxRuntimeError(Exception):
+
+    def __init__(self, token: Token, message: str):
+        super().__init__(message)
+
+        self.token = token
+        self.message = message

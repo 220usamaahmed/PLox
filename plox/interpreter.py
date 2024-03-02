@@ -2,8 +2,8 @@ from typing import Any
 from plox.ast.expr_interface import Expr
 from plox.ast.expr_types import Binary, Grouping, Literal, Unary
 from plox.ast.expr_visitor import ExprVisitor
-from plox.exceptions import InterpreterError, InterpreterErrorType
-from plox.token import TokenType
+from plox.exceptions import InterpreterError, InterpreterErrorType, PLoxRuntimeError
+from plox.token import Token, TokenType
 
 
 class Interpreter(ExprVisitor):
@@ -19,6 +19,7 @@ class Interpreter(ExprVisitor):
 
         match expr.operator.token_type:
             case TokenType.MINUS:
+                self.check_number_operand(expr.operator, right)
                 return -float(right)
 
             case TokenType.BANG:
@@ -34,25 +35,30 @@ class Interpreter(ExprVisitor):
 
         match expr.operator.token_type:
             case TokenType.GREATER:
+                self.check_number_operand(expr.operator, left, right)
                 return float(left) > float(right)
 
             case TokenType.GREATER_EQUAL:
+                self.check_number_operand(expr.operator, left, right)
                 return float(left) >= float(right)
 
             case TokenType.LESS:
+                self.check_number_operand(expr.operator, left, right)
                 return float(left) < float(right)
 
             case TokenType.LESS_EQUAL:
+                self.check_number_operand(expr.operator, left, right)
                 return float(left) <= float(right)
-
-            case TokenType.MINUS:
-                return float(left) - float(right)
 
             case TokenType.BANG_EQUAL:
                 return not self.is_equal(left, right)
 
             case TokenType.EQUAL_EQUAL:
                 return self.is_equal(left, right)
+
+            case TokenType.MINUS:
+                self.check_number_operand(expr.operator, left, right)
+                return float(left) - float(right)
 
             case TokenType.PLUS:
                 if isinstance(left, float) and isinstance(right, float):
@@ -61,10 +67,15 @@ class Interpreter(ExprVisitor):
                 if isinstance(left, str) and isinstance(right, str):
                     return str(left) + str(right)
 
+                raise RuntimeError(
+                    expr.operator, "Operands must be two numbers or two strings")
+
             case TokenType.SLASH:
+                self.check_number_operand(expr.operator, left, right)
                 return float(left) / float(right)
 
             case TokenType.STAR:
+                self.check_number_operand(expr.operator, left, right)
                 return float(left) * float(right)
 
             case _:
@@ -88,3 +99,8 @@ class Interpreter(ExprVisitor):
             return False
 
         return a == b
+
+    def check_number_operand(self, operator: Token, *operands: object):
+        for operand in operands:
+            if not isinstance(operand, float):
+                raise PLoxRuntimeError(operator, "Operand must be a number")
