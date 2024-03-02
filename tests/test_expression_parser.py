@@ -63,8 +63,17 @@ def test_equality():
 
 
 def test_comparison():
+    source = "2 > 2"
+    assert parse(source) == "(> 2.0 2.0)"
+
     source = "2 >= 2"
     assert parse(source) == "(>= 2.0 2.0)"
+
+    source = "2 < 2"
+    assert parse(source) == "(< 2.0 2.0)"
+
+    source = "2 <= 2"
+    assert parse(source) == "(<= 2.0 2.0)"
 
 
 def test_complex_expression():
