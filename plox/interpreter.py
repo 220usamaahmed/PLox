@@ -13,7 +13,8 @@ class Interpreter(ExprVisitor):
 
     def interpret(self, expression: Expr):
         try:
-            return self.stringify(self.evaluate(expression))
+            result = self.evaluate(expression)
+            return self.stringify(result)
         except PLoxRuntimeError as e:
             self.handle_runtime_error(e)
 

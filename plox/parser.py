@@ -43,7 +43,7 @@ class Parser:
         expr = self.term()
 
         while self.match(TokenType.GREATER, TokenType.GREATER_EQUAL,
-                         TokenType.LEFT_BRACE, TokenType.LESS_EQUAL):
+                         TokenType.LESS, TokenType.LESS_EQUAL):
             operator = self.previous()
             right = self.term()
             expr = Binary(expr, operator, right)
