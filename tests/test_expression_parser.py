@@ -58,6 +58,9 @@ def test_factor():
 
 
 def test_equality():
+    source = "2 == 2"
+    assert parse(source) == "(== 2.0 2.0)"
+
     source = "2 != 2"
     assert parse(source) == "(!= 2.0 2.0)"
 
