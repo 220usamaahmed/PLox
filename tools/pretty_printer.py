@@ -15,12 +15,21 @@ class ASTPrettyPrinter(ExprVisitor):
 
         return f"({name}{output})"
 
-    def visit_assign_expr(self, expr: Assign):
-        raise Exception(
-            'ASTPrettyPrinter.visit_assign_expr(name: Token, expr: Expr) not implemented')
+    def visit_literal_expr(self, expr: Literal):
+        return str(expr.value)
 
     def visit_binary_expr(self, expr: Binary):
         return self.parenthesize(expr.operator.lexeme, expr.left, expr.right)
+
+    def visit_grouping_expr(self, expr: Grouping):
+        return self.parenthesize("group", expr.expression)
+
+    def visit_unary_expr(self, expr: Unary):
+        return self.parenthesize(expr.operator.lexeme, expr.right)
+
+    def visit_assign_expr(self, expr: Assign):
+        raise Exception(
+            'ASTPrettyPrinter.visit_assign_expr(name: Token, expr: Expr) not implemented')
 
     def visit_call_expr(self, expr: Call):
         raise Exception(
@@ -29,12 +38,6 @@ class ASTPrettyPrinter(ExprVisitor):
     def visit_get_expr(self, expr: Get):
         raise Exception(
             'ASTPrettyPrinter.visit_get_expr(object: Expr, name: Token) not implemented')
-
-    def visit_grouping_expr(self, expr: Grouping):
-        return self.parenthesize("group", expr.expression)
-
-    def visit_literal_expr(self, expr: Literal):
-        return str(expr.value)
 
     def visit_logical_expr(self, expr: Logical):
         raise Exception(
@@ -51,9 +54,6 @@ class ASTPrettyPrinter(ExprVisitor):
     def visit_this_expr(self, expr: This):
         raise Exception(
             'ASTPrettyPrinter.visit_this_expr(keyword: Token) not implemented')
-
-    def visit_unary_expr(self, expr: Unary):
-        return self.parenthesize(expr.operator.lexeme, expr.right)
 
     def visit_variable_expr(self, expr: Variable):
         raise Exception(
