@@ -1,38 +1,35 @@
-from typing import Any
+from typing import Any, List
 from plox.ast.expr_interface import Expr
 from plox.ast.expr_types import Binary, Grouping, Literal, Unary
 from plox.ast.expr_visitor import ExprVisitor
+from plox.ast.stmt_interface import Stmt
+from plox.ast.stmt_types import Expression, Print
+from plox.ast.stmt_visitor import StmtVisitor
 from plox.exceptions import InterpreterError, InterpreterErrorType, PLoxRuntimeError
 from plox.token import Token, TokenType
 
 
-class Interpreter(ExprVisitor):
+class Interpreter(ExprVisitor, StmtVisitor):
 
     def __init__(self):
         self.had_runtime_error = False
 
-    def interpret(self, expression: Expr):
+    def interpret(self, statements: List[Stmt]):
         try:
-            result = self.evaluate(expression)
-            return self.stringify(result)
+            for statement in statements:
+                self.execute(statement)
         except PLoxRuntimeError as e:
             return self.handle_runtime_error(e)
 
-    def stringify(self, object: Any) -> str:
-        if object == None:
-            return "nil"
+    def execute(self, stmt: Stmt):
+        stmt.accept(self)
 
-        if isinstance(object, float):
-            text = str(object)
-            if text.endswith(".0"):
-                text = text[:-2]
-            return text
+    def visit_expression_stmt(self, stmt: Expression):
+        self.evaluate(stmt.expression)
 
-        return str(object)
-
-    def handle_runtime_error(self, error: PLoxRuntimeError) -> str:
-        self.had_runtime_error = True
-        return f"[line {error.token.line}] {error.message}"
+    def visit_print_stmt(self, stmt: Print):
+        value = self.stringify(self.evaluate(stmt.expression))
+        print(value)
 
     def visit_literal_expr(self, expr: Literal) -> Any:
         return expr.value
@@ -130,3 +127,19 @@ class Interpreter(ExprVisitor):
         for operand in operands:
             if not isinstance(operand, float):
                 raise PLoxRuntimeError(operator, "Operand must be a number")
+
+    def stringify(self, object: Any) -> str:
+        if object == None:
+            return "nil"
+
+        if isinstance(object, float):
+            text = str(object)
+            if text.endswith(".0"):
+                text = text[:-2]
+            return text
+
+        return str(object)
+
+    def handle_runtime_error(self, error: PLoxRuntimeError) -> str:
+        self.had_runtime_error = True
+        return f"[line {error.token.line}] {error.message}"

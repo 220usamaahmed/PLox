@@ -1,4 +1,6 @@
 """
+EXPRESSION GRAMMAR
+------------------
 expression     → equality ;
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
@@ -8,11 +10,23 @@ unary          → ( "!" | "-" ) unary
                | primary ;
 primary        → NUMBER | STRING | "true" | "false" | "nil"
                | "(" expression ")" ;
+
+
+STATEMENT GRAMMAR
+-----------------
+program        → statement* EOF ;
+statement      → exprStmt
+               | printStmt ;
+
+exprStmt       → expression ";" ;
+printStmt      → "print" expression ";" ;
 """
 
 from typing import List
 from plox.ast.expr_interface import Expr
 from plox.ast.expr_types import Binary, Grouping, Unary, Literal
+from plox.ast.stmt_interface import Stmt
+from plox.ast.stmt_types import Print
 from plox.exceptions import ParserError, ParserErrorType
 from plox.token import Token, TokenType
 
@@ -24,7 +38,26 @@ class Parser:
         self.current = 0
 
     def parse(self):
-        return self.expression()
+        statements: List[Stmt] = []
+
+        while not self.is_at_end():
+            statements.append(self.statement())
+
+        return statements
+
+    def statement(self) -> Stmt:
+        if self.match(TokenType.PRINT):
+            return self.print_statement()
+
+        return self.expression_statement()
+
+    def expression_statement(self) -> Stmt:
+        ...
+
+    def print_statement(self) -> Stmt:
+        value = self.expression()
+        self.consume(TokenType.SEMI_COLON, ParserErrorType.MISSING_SEMI_COLON)
+        return Print(value)
 
     def expression(self) -> Expr:
         return self.equality()
@@ -111,16 +144,16 @@ class Parser:
         return False
 
     def check(self, type: TokenType) -> bool:
-        if self.isAtEnd():
+        if self.is_at_end():
             return False
         return self.peek().token_type == type
 
     def advance(self) -> Token:
-        if not self.isAtEnd():
+        if not self.is_at_end():
             self.current += 1
         return self.previous()
 
-    def isAtEnd(self) -> bool:
+    def is_at_end(self) -> bool:
         return self.peek().token_type == TokenType.EOF
 
     def peek(self) -> Token:
@@ -143,7 +176,7 @@ class Parser:
     def synchronize(self):
         self.advance()
 
-        while not self.isAtEnd():
+        while not self.is_at_end():
             if self.previous().token_type == TokenType.SEMI_COLON:
                 return
 

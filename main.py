@@ -40,18 +40,16 @@ def run(source: str):
         #     print(f"token: {token.line}\t{token.token_type} - {token.lexeme}")
 
         parser = Parser(tokens)
-        expression = parser.parse()
+        statements = parser.parse()
         # print(ASTPrettyPrinter().print(expression))
 
         interpretor = Interpreter()
-        result = interpretor.interpret(expression)
+        interpretor.interpret(statements)
 
         if (scanner.had_error):
             exit(65)
         if interpretor.had_runtime_error:
             exit(70)
-
-        print(result)
 
     except ScannerError as e:
         display_error(e.line, e.location, e.type.value)
