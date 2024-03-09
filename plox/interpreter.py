@@ -1,10 +1,11 @@
 from typing import Any, List
 from plox.ast.expr_interface import Expr
-from plox.ast.expr_types import Binary, Grouping, Literal, Unary
+from plox.ast.expr_types import Binary, Grouping, Literal, Unary, Variable
 from plox.ast.expr_visitor import ExprVisitor
 from plox.ast.stmt_interface import Stmt
-from plox.ast.stmt_types import Expression, Print
+from plox.ast.stmt_types import Expression, Print, VariableDeclaration
 from plox.ast.stmt_visitor import StmtVisitor
+from plox.environment import Environment
 from plox.exceptions import InterpreterError, InterpreterErrorType, PLoxRuntimeError
 from plox.token import Token, TokenType
 
@@ -13,6 +14,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def __init__(self):
         self.had_runtime_error = False
+        self.environment = Environment()
 
     def interpret(self, statements: List[Stmt]):
         try:
@@ -30,6 +32,13 @@ class Interpreter(ExprVisitor, StmtVisitor):
     def visit_print_stmt(self, stmt: Print):
         value = self.stringify(self.evaluate(stmt.expression))
         print(value)
+
+    def visit_variabledeclaration_stmt(self, stmt: VariableDeclaration) -> Any:
+        value = None
+        if stmt.initializer is not None:
+            value = self.evaluate(stmt.initializer)
+
+        self.environment.define(stmt.name.lexeme, value)
 
     def visit_literal_expr(self, expr: Literal) -> Any:
         return expr.value
@@ -104,6 +113,9 @@ class Interpreter(ExprVisitor, StmtVisitor):
             case _:
                 raise InterpreterError(
                     InterpreterErrorType.INVALID_BINARY_OPERATOR)
+            
+    def visit_variable_expr(self, expr: Variable) -> Any:
+        return self.environment.get(expr.name)
 
     def evaluate(self, expr: Expr):
         return expr.accept(self)

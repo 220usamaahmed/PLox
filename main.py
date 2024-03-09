@@ -5,14 +5,17 @@ from plox.parser import Parser
 
 from plox.scanner import Scanner
 from plox.utils import display_error
+from tools.pretty_printer import ASTPrettyPrinter
 
 
 def run_repl():
+    interpretor = Interpreter()
+
     while True:
         contents = input("> ").strip()
         if contents == 'quit':
             break
-        run(contents)
+        run(interpretor, contents)
 
 
 def run_file(file_path: str):
@@ -31,24 +34,20 @@ def run_file(file_path: str):
         print("An unexpected error occurred:", e)
 
 
-def run(source: str):
+def run(interpreter: Interpreter, source: str):
     scanner = Scanner(source)
 
     try:
         tokens = scanner.scan_tokens()
-        # for token in scanner.tokens:
-        #     print(f"token: {token.line}\t{token.token_type} - {token.lexeme}")
 
         parser = Parser(tokens)
         statements = parser.parse()
-        # print(ASTPrettyPrinter().print(expression))
 
-        interpretor = Interpreter()
-        interpretor.interpret(statements)
+        interpreter.interpret(statements)
 
         if (scanner.had_error):
             exit(65)
-        if interpretor.had_runtime_error:
+        if interpreter.had_runtime_error:
             exit(70)
 
     except ScannerError as e:
