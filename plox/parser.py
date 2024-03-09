@@ -8,25 +8,29 @@ term           → factor ( ( "-" | "+" ) factor )* ;
 factor         → unary ( ( "/" | "*" ) unary )* ;
 unary          → ( "!" | "-" ) unary
                | primary ;
-primary        → NUMBER | STRING | "true" | "false" | "nil"
-               | "(" expression ")" ;
+primary        → "true" | "false" | "nil"
+               | NUMBER | STRING
+               | "(" expression ")"
+               | IDENTIFIER ;
 
 
 STATEMENT GRAMMAR
 -----------------
-program        → statement* EOF ;
+program        → declaration* EOF ;
+declaration    → varDecl
+               | statement
 statement      → exprStmt
                | printStmt ;
-
 exprStmt       → expression ";" ;
 printStmt      → "print" expression ";" ;
+varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 """
 
 from typing import List
 from plox.ast.expr_interface import Expr
-from plox.ast.expr_types import Binary, Grouping, Unary, Literal
+from plox.ast.expr_types import Binary, Grouping, Unary, Literal, Variable
 from plox.ast.stmt_interface import Stmt
-from plox.ast.stmt_types import Print
+from plox.ast.stmt_types import Expression, Print, VariableDeclaration
 from plox.exceptions import ParserError, ParserErrorType
 from plox.token import Token, TokenType
 
@@ -41,9 +45,18 @@ class Parser:
         statements: List[Stmt] = []
 
         while not self.is_at_end():
-            statements.append(self.statement())
+            statements.append(self.declaration())
 
         return statements
+
+    def declaration(self) -> Stmt:
+        try:
+            if self.match(TokenType.VAR):
+                return self.var_declaration();
+            
+            return self.statement()
+        except ParserError:
+            self.synchronize()
 
     def statement(self) -> Stmt:
         if self.match(TokenType.PRINT):
@@ -52,12 +65,24 @@ class Parser:
         return self.expression_statement()
 
     def expression_statement(self) -> Stmt:
-        ...
+        expr = self.expression()
+        self.consume(TokenType.SEMI_COLON, ParserErrorType.MISSING_SEMI_COLON)
+        return Expression(expr)
 
     def print_statement(self) -> Stmt:
         value = self.expression()
         self.consume(TokenType.SEMI_COLON, ParserErrorType.MISSING_SEMI_COLON)
         return Print(value)
+
+    def var_declaration(self) -> Stmt:
+        name = self.consume(TokenType.IDENTIFIER, ParserErrorType.MISSING_IDENTIFIER)
+
+        initializer = None
+        if self.match(TokenType.EQUAL):
+            initializer = self.expression()
+        
+        self.consume(TokenType.SEMI_COLON, ParserErrorType.MISSING_SEMI_COLON)
+        return VariableDeclaration(name, initializer)
 
     def expression(self) -> Expr:
         return self.equality()
@@ -114,13 +139,18 @@ class Parser:
     def primary(self) -> Expr:
         if self.match(TokenType.FALSE):
             return Literal(False)
+        
         if self.match(TokenType.TRUE):
             return Literal(True)
+        
         if self.match(TokenType.NIL):
             return Literal(None)
 
         if self.match(TokenType.NUMBER, TokenType.STRING):
             return Literal(self.previous().value)
+
+        if self.match(TokenType.IDENTIFIER):
+            return Variable(self.previous())
 
         if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()

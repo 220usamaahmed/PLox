@@ -24,6 +24,7 @@ class ParserErrorType(Enum):
     MISSING_RIGHT_PARAN = "Missing Right Paran"
     MISSING_SEMI_COLON = "Missing Semi Colon"
     EXPRESSION_EXPECTED = "Expression Expected"
+    MISSING_IDENTIFIER = "Missing Identifier"
 
 
 class ParserError(Exception):
