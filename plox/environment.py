@@ -8,15 +8,17 @@ class Environment:
         self.values = {}
 
     def define(self, name: str, value: object):
-        print(f"Defining {name} = {value}")
         self.values[name] = value
-        print(self.values)
 
     def get(self, name: Token) -> object:
-        print(f"Getting {name.lexeme}, {self.values}")
-
         if name.lexeme in self.values:
-            print(f"{name} found: {self.values[name.lexeme]}")
             return self.values[name.lexeme]
+        
+        raise PLoxRuntimeError(name, f"Undefined variable {name.lexeme}.")
+    
+    def assign(self, name: Token, value: object):
+        if name.lexeme in self.values:
+            self.values[name.lexeme] = value
+            return
         
         raise PLoxRuntimeError(name, f"Undefined variable {name.lexeme}.")

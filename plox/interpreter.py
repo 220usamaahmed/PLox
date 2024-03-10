@@ -1,6 +1,6 @@
 from typing import Any, List
 from plox.ast.expr_interface import Expr
-from plox.ast.expr_types import Binary, Grouping, Literal, Unary, Variable
+from plox.ast.expr_types import Assign, Binary, Grouping, Literal, Unary, Variable
 from plox.ast.expr_visitor import ExprVisitor
 from plox.ast.stmt_interface import Stmt
 from plox.ast.stmt_types import Expression, Print, VariableDeclaration
@@ -39,6 +39,11 @@ class Interpreter(ExprVisitor, StmtVisitor):
             value = self.evaluate(stmt.initializer)
 
         self.environment.define(stmt.name.lexeme, value)
+
+    def visit_assign_expr(self, expr: Assign) -> Any:
+        value = self.evaluate(expr.value)
+        self.environment.assign(expr.name, value)
+        return value
 
     def visit_literal_expr(self, expr: Literal) -> Any:
         return expr.value

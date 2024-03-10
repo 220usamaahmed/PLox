@@ -1,7 +1,9 @@
 """
 EXPRESSION GRAMMAR
 ------------------
-expression     → equality ;
+expression     → assignment ;
+assignment     → IDENTIFIER "=" assignment
+               | equality
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           → factor ( ( "-" | "+" ) factor )* ;
@@ -28,7 +30,7 @@ varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 
 from typing import List
 from plox.ast.expr_interface import Expr
-from plox.ast.expr_types import Binary, Grouping, Unary, Literal, Variable
+from plox.ast.expr_types import Assign, Binary, Grouping, Unary, Literal, Variable
 from plox.ast.stmt_interface import Stmt
 from plox.ast.stmt_types import Expression, Print, VariableDeclaration
 from plox.exceptions import ParserError, ParserErrorType
@@ -85,7 +87,24 @@ class Parser:
         return VariableDeclaration(name, initializer)
 
     def expression(self) -> Expr:
-        return self.equality()
+        return self.assignment()
+    
+    def assignment(self) -> Expr:
+        expr = self.equality()
+
+        if self.match(TokenType.EQUAL):
+            equals = self.previous()
+            value = self.assignment()
+
+            if isinstance(expr, Variable):
+                name = expr.name
+                return Assign(name, value)
+            
+            # TODO: Handle error reporting
+            print(f"Invalid assignment target. {equals}") 
+        
+        return expr
+
 
     def equality(self) -> Expr:
         expr = self.comparison()
