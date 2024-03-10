@@ -8,7 +8,7 @@ def parse(source: str) -> str:
     tokens = scanner.scan_tokens()
 
     parser = Parser(tokens)
-    ast = parser.parse()
+    ast = parser.expression()
 
     return ASTPrettyPrinter().print(ast)
 
