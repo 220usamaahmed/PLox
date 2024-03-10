@@ -24,7 +24,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
             return self.handle_runtime_error(e)
 
     def execute(self, stmt: Stmt):
-        stmt.accept(self)
+        return stmt.accept(self)
 
     def visit_block_stmt(self, stmt: Block) -> Any:
         self.execute_block(stmt.statements, Environment(self.environment))
