@@ -22,7 +22,7 @@ class ScannerError(Exception):
 class ParserErrorType(Enum):
 
     MISSING_RIGHT_PARAN = "Missing Right Paran"
-    MISSING_CLOSING_BRACKET = "Missing closing bracket"
+    MISSING_CLOSING_BRACE = "Missing closing bracket"
     MISSING_SEMI_COLON = "Missing Semi Colon"
     EXPRESSION_EXPECTED = "Expression Expected"
     MISSING_IDENTIFIER = "Missing Identifier"

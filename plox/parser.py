@@ -79,10 +79,10 @@ class Parser:
     def block(self) -> List[Stmt]:
         statements: List[Stmt] = []
 
-        while self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
+        while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
             statements.append(self.declaration())
 
-        self.consume(TokenType.RIGHT_BRACE, ParserErrorType.MISSING_CLOSING_BRACKET)
+        self.consume(TokenType.RIGHT_BRACE, ParserErrorType.MISSING_CLOSING_BRACE)
         return statements
 
     def print_statement(self) -> Stmt:
