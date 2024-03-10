@@ -22,9 +22,11 @@ program        → declaration* EOF ;
 declaration    → varDecl
                | statement
 statement      → exprStmt
-               | printStmt ;
+               | printStmt
+               | block ;
 exprStmt       → expression ";" ;
 printStmt      → "print" expression ";" ;
+block          → "{" declaration* "}"
 varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 """
 
@@ -32,7 +34,7 @@ from typing import List
 from plox.ast.expr_interface import Expr
 from plox.ast.expr_types import Assign, Binary, Grouping, Unary, Literal, Variable
 from plox.ast.stmt_interface import Stmt
-from plox.ast.stmt_types import Expression, Print, VariableDeclaration
+from plox.ast.stmt_types import Block, Expression, Print, VariableDeclaration
 from plox.exceptions import ParserError, ParserErrorType
 from plox.token import Token, TokenType
 
@@ -63,6 +65,9 @@ class Parser:
     def statement(self) -> Stmt:
         if self.match(TokenType.PRINT):
             return self.print_statement()
+        
+        if self.match(TokenType.LEFT_BRACE):
+            return Block(self.block())
 
         return self.expression_statement()
 
@@ -70,6 +75,15 @@ class Parser:
         expr = self.expression()
         self.consume(TokenType.SEMI_COLON, ParserErrorType.MISSING_SEMI_COLON)
         return Expression(expr)
+    
+    def block(self) -> List[Stmt]:
+        statements: List[Stmt] = []
+
+        while self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
+            statements.append(self.declaration())
+
+        self.consume(TokenType.RIGHT_BRACE, ParserErrorType.MISSING_CLOSING_BRACKET)
+        return statements
 
     def print_statement(self) -> Stmt:
         value = self.expression()

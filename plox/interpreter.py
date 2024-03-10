@@ -3,7 +3,7 @@ from plox.ast.expr_interface import Expr
 from plox.ast.expr_types import Assign, Binary, Grouping, Literal, Unary, Variable
 from plox.ast.expr_visitor import ExprVisitor
 from plox.ast.stmt_interface import Stmt
-from plox.ast.stmt_types import Expression, Print, VariableDeclaration
+from plox.ast.stmt_types import Block, Expression, Print, VariableDeclaration
 from plox.ast.stmt_visitor import StmtVisitor
 from plox.environment import Environment
 from plox.exceptions import InterpreterError, InterpreterErrorType, PLoxRuntimeError
@@ -25,6 +25,9 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def execute(self, stmt: Stmt):
         stmt.accept(self)
+
+    def visit_block_stmt(self, stmt: Block) -> Any:
+        self.execute_block(stmt.statements, Environment(self.environment))
 
     def visit_expression_stmt(self, stmt: Expression):
         self.evaluate(stmt.expression)
@@ -124,6 +127,18 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def evaluate(self, expr: Expr):
         return expr.accept(self)
+    
+    def execute_block(self, statements: List[Stmt], environment: Environment):
+        previous_env = self.environment
+
+        try:
+            self.environment = environment
+
+            for statement in statements:
+                self.execute(statement)
+
+        finally:
+            self.environment = previous_env
 
     def is_truthy(self, object: Any) -> bool:
         if (object == None):
