@@ -1,10 +1,11 @@
 from typing import Any, List
 from plox.ast.expr_interface import Expr
-from plox.ast.expr_types import Assign, Binary, Grouping, Literal, Logical, Unary, Variable
+from plox.ast.expr_types import Assign, Binary, Call, Grouping, Literal, Logical, Unary, Variable
 from plox.ast.expr_visitor import ExprVisitor
 from plox.ast.stmt_interface import Stmt
 from plox.ast.stmt_types import Block, Expression, If, Print, VariableDeclaration, While
 from plox.ast.stmt_visitor import StmtVisitor
+from plox.callable import Callable, Clock
 from plox.environment import Environment
 from plox.exceptions import InterpreterError, InterpreterErrorType, PLoxRuntimeError
 from plox.token import Token, TokenType
@@ -14,7 +15,13 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def __init__(self):
         self.had_runtime_error = False
-        self.environment = Environment()
+        self.globals = Environment()
+        self.environment = self.globals
+
+        self.initialize_globals()
+
+    def initialize_globals(self):
+        self.globals.define("clock", Clock())
 
     def interpret(self, statements: List[Stmt]):
         try:
@@ -141,6 +148,21 @@ class Interpreter(ExprVisitor, StmtVisitor):
             case _:
                 raise InterpreterError(
                     InterpreterErrorType.INVALID_BINARY_OPERATOR)
+
+    def visit_call_expr(self, expr: Call) -> Any:
+        callee: Callable = self.evaluate(expr.callee)
+
+        if not isinstance(callee, Callable):
+            raise PLoxRuntimeError(expr.paren, "Can only call functions and classes.")
+
+        arguments = []
+        for argument in expr.params:
+            arguments.append(self.evaluate(argument))
+
+        if len(arguments) != callee.arity():
+            raise PLoxRuntimeError(expr.paren, f"Expected {callee.arity()} arguments but got {len(arguments)}.")
+
+        return callee.call(self, arguments)
             
     def visit_variable_expr(self, expr: Variable) -> Any:
         return self.environment.get(expr.name)

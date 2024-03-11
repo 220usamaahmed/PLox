@@ -10,8 +10,9 @@ equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           → factor ( ( "-" | "+" ) factor )* ;
 factor         → unary ( ( "/" | "*" ) unary )* ;
-unary          → ( "!" | "-" ) unary
-               | primary ;
+unary          → ( "!" | "-" ) unary | call ;
+call           → primary ( "(" arguments? ")" )* ;
+arguments      → expression ( "," expression )* ;
 primary        → "true" | "false" | "nil"
                | NUMBER | STRING
                | "(" expression ")"
@@ -43,7 +44,7 @@ varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 
 from typing import List
 from plox.ast.expr_interface import Expr
-from plox.ast.expr_types import Assign, Binary, Grouping, Logical, Unary, Literal, Variable
+from plox.ast.expr_types import Assign, Binary, Call, Grouping, Logical, Unary, Literal, Variable
 from plox.ast.stmt_interface import Stmt
 from plox.ast.stmt_types import Block, Expression, If, Print, VariableDeclaration, While
 from plox.exceptions import ParserError, ParserErrorType
@@ -266,7 +267,18 @@ class Parser:
             right = self.unary()
             return Unary(operator, right)
 
-        return self.primary()
+        return self.call()
+
+    def call(self) -> Expr:
+        expr = self.primary()
+
+        while True:
+            if self.match(TokenType.LEFT_PAREN):
+                expr = self.finish_call(expr)
+            else:
+                break
+        
+        return expr
 
     def primary(self) -> Expr:
         if self.match(TokenType.FALSE):
@@ -297,6 +309,23 @@ class Parser:
             location = f"Near '{token.lexeme}'"
         raise ParserError(token.line, location,
                           ParserErrorType.EXPRESSION_EXPECTED)
+    
+    def finish_call(self, callee: Expr) -> Expr:
+        arguments = []
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                if len(arguments) >= 255:
+                    # TODO: These kind of errors still need to be properly handled
+                    raise Exception("Can't have more than 255 arguments") 
+
+                arguments.push(self.expression())
+                if not self.match(TokenType.COMMA):
+                    break
+
+        paren = self.consume(TokenType.RIGHT_PAREN, ParserErrorType.MISSING_RIGHT_PARAN)
+
+        return Call(callee, paren, arguments)
+
 
     def match(self, *types: TokenType) -> bool:
         for type in types:
