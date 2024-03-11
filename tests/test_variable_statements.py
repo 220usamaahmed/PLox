@@ -1,9 +1,8 @@
-from plox.interpreter import Interpreter
-from plox.parser import Parser
-from plox.scanner import Scanner
+from .utils import capture_stdout, run_code
+import textwrap
 
 
-def test():
+def test(capture_stdout):
     source = """
         var a = "global a";
         var b = "global b";
@@ -26,11 +25,17 @@ def test():
         print c;    
     """
 
-    scanner = Scanner(source)
-    tokens = scanner.scan_tokens()
+    expected = textwrap.dedent("""
+        "inner a"
+        "outer b"
+        "global c"
+        "outer a"
+        "outer b"
+        "global c"
+        "global a"
+        "global b"
+        "global c"
+    """).strip() + "\n"
 
-    parser = Parser(tokens)
-    statements = parser.parse()
-
-    interpreter = Interpreter()
-    interpreter.interpret(statements)
+    run_code(source, capture_stdout)
+    assert capture_stdout["stdout"] == expected 
