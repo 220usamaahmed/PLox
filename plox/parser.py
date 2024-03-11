@@ -22,8 +22,11 @@ program        → declaration* EOF ;
 declaration    → varDecl
                | statement
 statement      → exprStmt
+               | ifStmt
                | printStmt
                | block ;
+ifStmt         → "if" "(" expression ")" statement
+               ( "else" statement )? ; 
 exprStmt       → expression ";" ;
 printStmt      → "print" expression ";" ;
 block          → "{" declaration* "}"
@@ -34,7 +37,7 @@ from typing import List
 from plox.ast.expr_interface import Expr
 from plox.ast.expr_types import Assign, Binary, Grouping, Unary, Literal, Variable
 from plox.ast.stmt_interface import Stmt
-from plox.ast.stmt_types import Block, Expression, Print, VariableDeclaration
+from plox.ast.stmt_types import Block, Expression, If, Print, VariableDeclaration
 from plox.exceptions import ParserError, ParserErrorType
 from plox.token import Token, TokenType
 
@@ -63,6 +66,8 @@ class Parser:
             self.synchronize()
 
     def statement(self) -> Stmt:
+        if self.match(TokenType.IF): return self.if_statement()
+
         if self.match(TokenType.PRINT):
             return self.print_statement()
         
@@ -84,6 +89,18 @@ class Parser:
 
         self.consume(TokenType.RIGHT_BRACE, ParserErrorType.MISSING_CLOSING_BRACE)
         return statements
+
+    def if_statement(self) -> Stmt:
+        self.consume(TokenType.LEFT_PAREN, ParserErrorType.MISSING_LEFT_PARAN)
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, ParserErrorType.MISSING_RIGHT_PARAN)
+
+        then_branch = self.statement()
+        else_branch = None
+        if self.match(TokenType.ELSE):
+            else_branch = self.statement()
+
+        return If(condition, then_branch, else_branch)
 
     def print_statement(self) -> Stmt:
         value = self.expression()

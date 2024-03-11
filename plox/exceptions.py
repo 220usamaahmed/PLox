@@ -21,6 +21,7 @@ class ScannerError(Exception):
 
 class ParserErrorType(Enum):
 
+    MISSING_LEFT_PARAN = "Missing Left Paran"
     MISSING_RIGHT_PARAN = "Missing Right Paran"
     MISSING_CLOSING_BRACE = "Missing closing bracket"
     MISSING_SEMI_COLON = "Missing Semi Colon"
