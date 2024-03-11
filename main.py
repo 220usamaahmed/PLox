@@ -67,7 +67,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
-    from tests.test_loop_statements import test_for_loop
-
-    test_for_loop()
+    main()
