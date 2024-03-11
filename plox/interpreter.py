@@ -3,7 +3,7 @@ from plox.ast.expr_interface import Expr
 from plox.ast.expr_types import Assign, Binary, Grouping, Literal, Unary, Variable
 from plox.ast.expr_visitor import ExprVisitor
 from plox.ast.stmt_interface import Stmt
-from plox.ast.stmt_types import Block, Expression, Print, VariableDeclaration
+from plox.ast.stmt_types import Block, Expression, If, Print, VariableDeclaration
 from plox.ast.stmt_visitor import StmtVisitor
 from plox.environment import Environment
 from plox.exceptions import InterpreterError, InterpreterErrorType, PLoxRuntimeError
@@ -31,6 +31,12 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def visit_expression_stmt(self, stmt: Expression):
         self.evaluate(stmt.expression)
+
+    def visit_if_stmt(self, stmt: If) -> Any:
+        if self.is_truthy(self.evaluate(stmt.condition)):
+            self.execute(stmt.thenBranch)
+        elif stmt.elseBranch is not None:
+            self.execute(stmt.elseBranch)
 
     def visit_print_stmt(self, stmt: Print):
         value = self.stringify(self.evaluate(stmt.expression))
