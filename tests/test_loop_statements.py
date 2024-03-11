@@ -23,11 +23,9 @@ def test_while_loop():
 
 def test_for_loop():
     source = """
-        var count = 0;
-        while (count < 10) {
-            print count;
-            count = count + 1;
-        }    
+        for (var i = 0; i < 10; i = i + 1) {
+            print i;
+        }
     """
 
     scanner = Scanner(source)

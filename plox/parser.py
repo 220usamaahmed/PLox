@@ -24,12 +24,17 @@ program        → declaration* EOF ;
 declaration    → varDecl
                | statement
 statement      → exprStmt
+               | forStmt
                | ifStmt
                | printStmt
                | whileStmt
                | block ;
 ifStmt         → "if" "(" expression ")" statement
-               ( "else" statement )? ; 
+               ( "else" statement )? ;
+whileStmt      → "while" "(" expression ")" statement ;
+forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
+                 expression? ";"
+                 expression? ")" statement ; 
 exprStmt       → expression ";" ;
 printStmt      → "print" expression ";" ;
 block          → "{" declaration* "}"
@@ -69,7 +74,11 @@ class Parser:
             self.synchronize()
 
     def statement(self) -> Stmt:
-        if self.match(TokenType.IF): return self.if_statement()
+        if self.match(TokenType.FOR):
+            return self.for_statement()
+
+        if self.match(TokenType.IF): 
+            return self.if_statement()
 
         if self.match(TokenType.PRINT):
             return self.print_statement()
@@ -81,6 +90,45 @@ class Parser:
             return Block(self.block())
 
         return self.expression_statement()
+    
+    def for_statement(self) -> Stmt:
+        self.consume(TokenType.LEFT_PAREN, ParserErrorType.MISSING_LEFT_PARAN)
+
+        if self.match(TokenType.SEMI_COLON):
+            initializer = None
+        elif self.match(TokenType.VAR):
+            initializer = self.var_declaration()
+        else:
+            initializer = self.expression_statement()
+
+        if not self.check(TokenType.SEMI_COLON):
+            condition = self.expression()
+        else:
+            condition = Literal(True)
+
+        self.consume(TokenType.SEMI_COLON, ParserErrorType.MISSING_SEMI_COLON)
+
+        if not self.check(TokenType.RIGHT_PAREN):
+            increment = self.expression()
+        else:
+            increment = None
+
+        self.consume(TokenType.RIGHT_PAREN, ParserErrorType.MISSING_RIGHT_PARAN)
+
+        body = self.statement()
+
+        if increment is not None:
+            body = Block([
+                body,
+                Expression(increment)
+            ])
+
+        body = While(condition, body)
+
+        if initializer is not None:
+            body = Block([initializer, body])
+
+        return body
 
     def expression_statement(self) -> Stmt:
         expr = self.expression()
