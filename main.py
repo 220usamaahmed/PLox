@@ -67,4 +67,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    from tests.test_conditional_statements import test
+
+    test()
