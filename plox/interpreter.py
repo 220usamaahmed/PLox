@@ -1,6 +1,6 @@
 from typing import Any, List
 from plox.ast.expr_interface import Expr
-from plox.ast.expr_types import Assign, Binary, Grouping, Literal, Unary, Variable
+from plox.ast.expr_types import Assign, Binary, Grouping, Literal, Logical, Unary, Variable
 from plox.ast.expr_visitor import ExprVisitor
 from plox.ast.stmt_interface import Stmt
 from plox.ast.stmt_types import Block, Expression, If, Print, VariableDeclaration
@@ -56,6 +56,16 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def visit_literal_expr(self, expr: Literal) -> Any:
         return expr.value
+    
+    def visit_logical_expr(self, expr: Logical) -> Any:
+        left = self.evaluate(expr.left)
+
+        if expr.operator.token_type == TokenType.OR:
+            if self.is_truthy(left): return left
+        else:
+            if not self.is_truthy(left): return left
+
+        return self.evaluate(expr.right)
 
     def visit_grouping_expr(self, expr: Grouping) -> Any:
         return self.evaluate(expr.expression)

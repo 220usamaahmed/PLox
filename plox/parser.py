@@ -3,7 +3,9 @@ EXPRESSION GRAMMAR
 ------------------
 expression     → assignment ;
 assignment     → IDENTIFIER "=" assignment
-               | equality
+               | logic_or ;
+logic_or       → logic_and ( "or" logic_and )* ;
+logic_and      → equality ( "and" equality )* ; 
 equality       → comparison ( ( "!=" | "==" ) comparison )* ;
 comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           → factor ( ( "-" | "+" ) factor )* ;
@@ -35,7 +37,7 @@ varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 
 from typing import List
 from plox.ast.expr_interface import Expr
-from plox.ast.expr_types import Assign, Binary, Grouping, Unary, Literal, Variable
+from plox.ast.expr_types import Assign, Binary, Grouping, Logical, Unary, Literal, Variable
 from plox.ast.stmt_interface import Stmt
 from plox.ast.stmt_types import Block, Expression, If, Print, VariableDeclaration
 from plox.exceptions import ParserError, ParserErrorType
@@ -121,7 +123,7 @@ class Parser:
         return self.assignment()
     
     def assignment(self) -> Expr:
-        expr = self.equality()
+        expr = self.or_expr()
 
         if self.match(TokenType.EQUAL):
             equals = self.previous()
@@ -136,6 +138,26 @@ class Parser:
         
         return expr
 
+    def or_expr(self) -> Expr:
+        expr = self.and_expr()
+
+        while self.match(TokenType.OR):
+            operator = self.previous()
+            right = self.and_expr()
+            expr = Logical(expr, operator, right)
+
+        return expr
+
+    def and_expr(self) -> Expr:
+        expr = self.equality()
+
+        while self.match(TokenType.AND):
+            operator = self.previous()
+            right = self.equality()
+            expr = Logical(expr, operator, right)
+
+        return expr
+    
 
     def equality(self) -> Expr:
         expr = self.comparison()
