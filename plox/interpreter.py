@@ -3,7 +3,7 @@ from plox.ast.expr_interface import Expr
 from plox.ast.expr_types import Assign, Binary, Grouping, Literal, Logical, Unary, Variable
 from plox.ast.expr_visitor import ExprVisitor
 from plox.ast.stmt_interface import Stmt
-from plox.ast.stmt_types import Block, Expression, If, Print, VariableDeclaration
+from plox.ast.stmt_types import Block, Expression, If, Print, VariableDeclaration, While
 from plox.ast.stmt_visitor import StmtVisitor
 from plox.environment import Environment
 from plox.exceptions import InterpreterError, InterpreterErrorType, PLoxRuntimeError
@@ -48,6 +48,10 @@ class Interpreter(ExprVisitor, StmtVisitor):
             value = self.evaluate(stmt.initializer)
 
         self.environment.define(stmt.name.lexeme, value)
+
+    def visit_while_stmt(self, stmt: While) -> Any:
+        while self.is_truthy(self.evaluate(stmt.condition)):
+            self.execute(stmt.body)
 
     def visit_assign_expr(self, expr: Assign) -> Any:
         value = self.evaluate(expr.value)

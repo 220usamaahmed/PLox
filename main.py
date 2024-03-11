@@ -68,6 +68,6 @@ def main():
 
 if __name__ == "__main__":
     # main()
-    from tests.test_conditional_statements import test
+    from tests.test_loop_statements import test_for_loop
 
-    test()
+    test_for_loop()

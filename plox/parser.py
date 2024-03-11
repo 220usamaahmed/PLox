@@ -26,6 +26,7 @@ declaration    → varDecl
 statement      → exprStmt
                | ifStmt
                | printStmt
+               | whileStmt
                | block ;
 ifStmt         → "if" "(" expression ")" statement
                ( "else" statement )? ; 
@@ -39,7 +40,7 @@ from typing import List
 from plox.ast.expr_interface import Expr
 from plox.ast.expr_types import Assign, Binary, Grouping, Logical, Unary, Literal, Variable
 from plox.ast.stmt_interface import Stmt
-from plox.ast.stmt_types import Block, Expression, If, Print, VariableDeclaration
+from plox.ast.stmt_types import Block, Expression, If, Print, VariableDeclaration, While
 from plox.exceptions import ParserError, ParserErrorType
 from plox.token import Token, TokenType
 
@@ -73,6 +74,9 @@ class Parser:
         if self.match(TokenType.PRINT):
             return self.print_statement()
         
+        if self.match(TokenType.WHILE):
+            return self.while_statement()
+
         if self.match(TokenType.LEFT_BRACE):
             return Block(self.block())
 
@@ -118,6 +122,14 @@ class Parser:
         
         self.consume(TokenType.SEMI_COLON, ParserErrorType.MISSING_SEMI_COLON)
         return VariableDeclaration(name, initializer)
+
+    def while_statement(self) -> Stmt:
+        self.consume(TokenType.LEFT_PAREN, ParserErrorType.MISSING_LEFT_PARAN)
+        condition = self.expression()
+        self.consume(TokenType.RIGHT_PAREN, ParserErrorType.MISSING_RIGHT_PARAN)
+        body = self.statement()
+
+        return While(condition, body)
 
     def expression(self) -> Expr:
         return self.assignment()
