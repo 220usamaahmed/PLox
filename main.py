@@ -39,6 +39,8 @@ def run(interpreter: Interpreter, source: str):
 
     try:
         tokens = scanner.scan_tokens()
+        for token in tokens:
+            print(token)
 
         parser = Parser(tokens)
         statements = parser.parse()

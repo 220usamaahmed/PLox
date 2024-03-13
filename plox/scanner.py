@@ -154,7 +154,7 @@ class Scanner():
         if token_type == TokenType.NUMBER:
             value = float(text)
         elif token_type == TokenType.STRING:
-            value = text
+            value = text[1:-1]
 
         self.tokens.append(Token(token_type, text, self.line, value))
 

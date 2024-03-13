@@ -1,4 +1,5 @@
 from .utils import capture_stdout, run_code
+import pytest
 
 
 def test_while_loop(capture_stdout):

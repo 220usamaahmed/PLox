@@ -22,8 +22,11 @@ primary        → "true" | "false" | "nil"
 STATEMENT GRAMMAR
 -----------------
 program        → declaration* EOF ;
-declaration    → varDecl
-               | statement
+declaration    → funDecl
+               | varDecl
+               | statement ;
+funDecl        → "fun" function ;
+function       → IDENTIFIER "(" parameters? ")" block ;
 statement      → exprStmt
                | forStmt
                | ifStmt
@@ -42,11 +45,11 @@ block          → "{" declaration* "}"
 varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 """
 
-from typing import List
+from typing import Literal as TypeLiteral, List
 from plox.ast.expr_interface import Expr
 from plox.ast.expr_types import Assign, Binary, Call, Grouping, Logical, Unary, Literal, Variable
 from plox.ast.stmt_interface import Stmt
-from plox.ast.stmt_types import Block, Expression, If, Print, VariableDeclaration, While
+from plox.ast.stmt_types import Block, Expression, Function, If, Print, VariableDeclaration, While
 from plox.exceptions import ParserError, ParserErrorType
 from plox.token import Token, TokenType
 
@@ -67,6 +70,9 @@ class Parser:
 
     def declaration(self) -> Stmt:
         try:
+            if self.match(TokenType.FUN):
+                return self.function("function")
+
             if self.match(TokenType.VAR):
                 return self.var_declaration();
             
@@ -136,6 +142,24 @@ class Parser:
         self.consume(TokenType.SEMI_COLON, ParserErrorType.MISSING_SEMI_COLON)
         return Expression(expr)
     
+    def function(self, kind: TypeLiteral["function", "method"]):
+        name = self.consume(TokenType.IDENTIFIER, ParserErrorType.EXPECTED_FUNCTION_NAME if kind == "function" else ParserErrorType.EXPECTED_METHOD_NAME)
+        self.consume(TokenType.LEFT_PAREN, ParserErrorType.MISSING_LEFT_PARAN)
+        parameters = []
+        if not self.check(TokenType.RIGHT_PAREN):
+            while True:
+                if len(parameters) >= 255:
+                    # TODO: Handle parser error
+                    raise Exception("Can't have more than 255 parameters")
+                parameters.append(self.consume(TokenType.IDENTIFIER, ParserErrorType.MISSING_IDENTIFIER))
+                if not self.match(TokenType.COMMA):
+                    break
+        self.consume(TokenType.RIGHT_PAREN, ParserErrorType.MISSING_RIGHT_PARAN)
+        self.consume(TokenType.LEFT_BRACE, ParserErrorType.MISSING_OPENING_BRACE)
+        body = self.block()
+        return Function(name, parameters, body)
+
+
     def block(self) -> List[Stmt]:
         statements: List[Stmt] = []
 
@@ -318,7 +342,7 @@ class Parser:
                     # TODO: These kind of errors still need to be properly handled
                     raise Exception("Can't have more than 255 arguments") 
 
-                arguments.push(self.expression())
+                arguments.append(self.expression())
                 if not self.match(TokenType.COMMA):
                     break
 

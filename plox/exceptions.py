@@ -23,9 +23,12 @@ class ParserErrorType(Enum):
 
     MISSING_LEFT_PARAN = "Missing Left Paran"
     MISSING_RIGHT_PARAN = "Missing Right Paran"
-    MISSING_CLOSING_BRACE = "Missing closing bracket"
+    MISSING_OPENING_BRACE = "Missing opening brace"
+    MISSING_CLOSING_BRACE = "Missing closing brace"
     MISSING_SEMI_COLON = "Missing Semi Colon"
     EXPRESSION_EXPECTED = "Expression Expected"
+    EXPECTED_FUNCTION_NAME = "Expected function name"
+    EXPECTED_METHOD_NAME = "Expected method name"
     MISSING_IDENTIFIER = "Missing Identifier"
 
 

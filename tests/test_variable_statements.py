@@ -26,15 +26,15 @@ def test(capture_stdout):
     """
 
     expected = textwrap.dedent("""
-        "inner a"
-        "outer b"
-        "global c"
-        "outer a"
-        "outer b"
-        "global c"
-        "global a"
-        "global b"
-        "global c"
+        inner a
+        outer b
+        global c
+        outer a
+        outer b
+        global c
+        global a
+        global b
+        global c
     """).strip() + "\n"
 
     run_code(source, capture_stdout)

@@ -3,9 +3,9 @@ from plox.ast.expr_interface import Expr
 from plox.ast.expr_types import Assign, Binary, Call, Grouping, Literal, Logical, Unary, Variable
 from plox.ast.expr_visitor import ExprVisitor
 from plox.ast.stmt_interface import Stmt
-from plox.ast.stmt_types import Block, Expression, If, Print, VariableDeclaration, While
+from plox.ast.stmt_types import Block, Expression, Function, If, Print, VariableDeclaration, While
 from plox.ast.stmt_visitor import StmtVisitor
-from plox.callable import Callable, Clock
+from plox.callable import Callable, Clock, PLoxFunction
 from plox.environment import Environment
 from plox.exceptions import InterpreterError, InterpreterErrorType, PLoxRuntimeError
 from plox.token import Token, TokenType
@@ -38,6 +38,10 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def visit_expression_stmt(self, stmt: Expression):
         self.evaluate(stmt.expression)
+
+    def visit_function_stmt(self, stmt: Function) -> Any:
+        function = PLoxFunction(stmt)
+        self.environment.define(stmt.name.lexeme, function)
 
     def visit_if_stmt(self, stmt: If) -> Any:
         if self.is_truthy(self.evaluate(stmt.condition)):
