@@ -3,9 +3,9 @@ from plox.ast.expr_interface import Expr
 from plox.ast.expr_types import Assign, Binary, Call, Grouping, Literal, Logical, Unary, Variable
 from plox.ast.expr_visitor import ExprVisitor
 from plox.ast.stmt_interface import Stmt
-from plox.ast.stmt_types import Block, Expression, Function, If, Print, VariableDeclaration, While
+from plox.ast.stmt_types import Block, Expression, Function, If, Print, Return, VariableDeclaration, While
 from plox.ast.stmt_visitor import StmtVisitor
-from plox.callable import Callable, Clock, PLoxFunction
+from plox.functions import Callable, Clock, PLoxFunction, ReturnException
 from plox.environment import Environment
 from plox.exceptions import InterpreterError, InterpreterErrorType, PLoxRuntimeError
 from plox.token import Token, TokenType
@@ -135,7 +135,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
                 if isinstance(left, float) and isinstance(right, float):
                     return float(left) + float(right)
 
-                if isinstance(left, str) and isinstance(right, str):
+                if isinstance(left, str) or isinstance(right, str):
                     return str(left) + str(right)
 
                 raise RuntimeError(
@@ -167,7 +167,11 @@ class Interpreter(ExprVisitor, StmtVisitor):
             raise PLoxRuntimeError(expr.paren, f"Expected {callee.arity()} arguments but got {len(arguments)}.")
 
         return callee.call(self, arguments)
-            
+
+    def visit_return_stmt(self, stmt: Return) -> Any:
+        value = self.evaluate(stmt.expr) if stmt.expr is not None else None
+        raise ReturnException(value)
+
     def visit_variable_expr(self, expr: Variable) -> Any:
         return self.environment.get(expr.name)
 

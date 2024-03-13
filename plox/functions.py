@@ -36,7 +36,10 @@ class PLoxFunction(Callable):
         environment = Environment(interpreter.globals)
         for i, params in enumerate(self.declaration.params):
             environment.define(params.lexeme, arguments[i])
-        interpreter.execute_block(self.declaration.body, environment)
+        try:
+            interpreter.execute_block(self.declaration.body, environment)
+        except ReturnException as e:
+            return e.value
         return None
 
     def arity(self) -> int:
@@ -44,3 +47,8 @@ class PLoxFunction(Callable):
     
     def __repr__(self) -> str:
         return f"<fn {self.declaration.name.lexeme}>"
+    
+class ReturnException(RuntimeError):
+
+    def __init__(self, value: object):
+        self.value = value

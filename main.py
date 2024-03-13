@@ -69,4 +69,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    from tests.test_functions import test_return_statement
+
+    test_return_statement()

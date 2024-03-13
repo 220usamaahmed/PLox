@@ -31,6 +31,7 @@ statement      → exprStmt
                | forStmt
                | ifStmt
                | printStmt
+               | returnStmt
                | whileStmt
                | block ;
 ifStmt         → "if" "(" expression ")" statement
@@ -41,6 +42,7 @@ forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
                  expression? ")" statement ; 
 exprStmt       → expression ";" ;
 printStmt      → "print" expression ";" ;
+returnStmt     → "return" expression? ";" ;
 block          → "{" declaration* "}"
 varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 """
@@ -49,7 +51,7 @@ from typing import Literal as TypeLiteral, List
 from plox.ast.expr_interface import Expr
 from plox.ast.expr_types import Assign, Binary, Call, Grouping, Logical, Unary, Literal, Variable
 from plox.ast.stmt_interface import Stmt
-from plox.ast.stmt_types import Block, Expression, Function, If, Print, VariableDeclaration, While
+from plox.ast.stmt_types import Block, Expression, Function, If, Print, Return, VariableDeclaration, While
 from plox.exceptions import ParserError, ParserErrorType
 from plox.token import Token, TokenType
 
@@ -89,7 +91,10 @@ class Parser:
 
         if self.match(TokenType.PRINT):
             return self.print_statement()
-        
+
+        if self.match(TokenType.RETURN):
+            return self.return_statement()
+
         if self.match(TokenType.WHILE):
             return self.while_statement()
 
@@ -185,6 +190,12 @@ class Parser:
         value = self.expression()
         self.consume(TokenType.SEMI_COLON, ParserErrorType.MISSING_SEMI_COLON)
         return Print(value)
+    
+    def return_statement(self) -> Stmt:
+        keyword = self.previous()
+        value = self.expression() if not self.check(TokenType.SEMI_COLON) else None 
+        self.consume(TokenType.SEMI_COLON, ParserErrorType.MISSING_SEMI_COLON)
+        return Return(keyword, value)
 
     def var_declaration(self) -> Stmt:
         name = self.consume(TokenType.IDENTIFIER, ParserErrorType.MISSING_IDENTIFIER)
