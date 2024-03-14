@@ -37,6 +37,33 @@ def test_return_statement(capture_stdout):
         8: 21
         9: 34
     """).strip() + "\n"
-    
+
+    run_code(source, capture_stdout)
+    assert expected == capture_stdout["stdout"]
+
+def test_closures(capture_stdout):
+    source = """
+        fun makeCounter() {
+            var i = 0;
+            fun count() {
+                i = i + 1;
+                print i;
+            }
+
+            return count;
+        }
+
+        var counter = makeCounter();
+        counter(); // "1".
+        counter(); // "2".
+        counter(); // "3".
+    """
+
+    expected = textwrap.dedent("""
+        1
+        2
+        3
+    """).strip() + "\n"
+
     run_code(source, capture_stdout)
     assert expected == capture_stdout["stdout"]
