@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Any
 import time
 
 from plox.ast.stmt_types import Function
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 class Callable:
 
-    def call(self, interpreter: "Interpreter", arguments: List[object]):
+    def call(self, interpreter: "Interpreter", arguments: List[object]) -> Any:
         raise Exception(
             "call(interpreter: Interpreter, arguments: List[object]) is not implemented"
         )

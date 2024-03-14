@@ -173,12 +173,12 @@ class Interpreter(ExprVisitor, StmtVisitor):
                 raise InterpreterError(InterpreterErrorType.INVALID_BINARY_OPERATOR)
 
     def visit_call_expr(self, expr: Call) -> Any:
-        callee: Callable = self.evaluate(expr.callee)
+        callee: Any = self.evaluate(expr.callee)
 
         if not isinstance(callee, Callable):
             raise PLoxRuntimeError(expr.paren, "Can only call functions and classes.")
 
-        arguments = []
+        arguments: List[Any] = []
         for argument in expr.params:
             arguments.append(self.evaluate(argument))
 

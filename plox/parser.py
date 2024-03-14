@@ -84,11 +84,12 @@ class Parser:
         statements: List[Stmt] = []
 
         while not self.is_at_end():
-            statements.append(self.declaration())
+            if statement := self.declaration():
+                statements.append(statement)
 
         return statements
 
-    def declaration(self) -> Stmt:
+    def declaration(self) -> Stmt | None:
         try:
             if self.match(TokenType.FUN):
                 return self.function("function")
@@ -99,6 +100,7 @@ class Parser:
             return self.statement()
         except ParserError:
             self.synchronize()
+            return None
 
     def statement(self) -> Stmt:
         if self.match(TokenType.FOR):
@@ -172,7 +174,7 @@ class Parser:
             ),
         )
         self.consume(TokenType.LEFT_PAREN, ParserErrorType.MISSING_LEFT_PARAN)
-        parameters = []
+        parameters: List[Token] = []
         if not self.check(TokenType.RIGHT_PAREN):
             while True:
                 if len(parameters) >= 255:
@@ -194,7 +196,8 @@ class Parser:
         statements: List[Stmt] = []
 
         while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
-            statements.append(self.declaration())
+            if statement := self.declaration():
+                statements.append(statement)
 
         self.consume(TokenType.RIGHT_BRACE, ParserErrorType.MISSING_CLOSING_BRACE)
         return statements
@@ -372,7 +375,7 @@ class Parser:
         raise ParserError(token.line, location, ParserErrorType.EXPRESSION_EXPECTED)
 
     def finish_call(self, callee: Expr) -> Expr:
-        arguments = []
+        arguments: List[Expr] = []
         if not self.check(TokenType.RIGHT_PAREN):
             while True:
                 if len(arguments) >= 255:

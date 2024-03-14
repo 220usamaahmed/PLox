@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict
 from plox.exceptions import PLoxRuntimeError
 from plox.token import Token
 
@@ -7,7 +7,7 @@ class Environment:
 
     def __init__(self, enclosing: Optional["Environment"] = None):
         self.enclosing = enclosing
-        self.values = {}
+        self.values: Dict[str, object] = {}
 
     def define(self, name: str, value: object):
         self.values[name] = value

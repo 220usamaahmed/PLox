@@ -11,7 +11,7 @@ def interpret(source: str) -> str:
     ast = parser.expression()
 
     interpreter = Interpreter()
-    return interpreter.execute(ast)
+    return interpreter.evaluate(ast)
 
 
 def test_addition():

@@ -5,7 +5,7 @@ from plox.parser import Parser
 
 from plox.scanner import Scanner
 from plox.utils import display_error
-from tools.pretty_printer import ASTPrettyPrinter
+from tools.pretty_printer import
 
 
 def run_repl():
@@ -19,11 +19,12 @@ def run_repl():
 
 
 def run_file(file_path: str):
-    print(f"Running script: {file_path}")
+    interpretor = Interpreter()
+
     try:
         with open(file_path, "r") as file:
             contents = file.read()
-            run(contents)
+            run(interpretor, contents)
     except FileNotFoundError:
         print("The file does not exist.")
     except PermissionError:
@@ -69,7 +70,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
-    from tests.test_functions import test_return_statement
-
-    test_return_statement()
+    main()
