@@ -3,9 +3,9 @@ from plox.exceptions import ParserError, ScannerError
 from plox.interpreter import Interpreter
 from plox.parser import Parser
 
+from plox.resolver import Resolver
 from plox.scanner import Scanner
 from plox.utils import display_error
-from tools.pretty_printer import
 
 
 def run_repl():
@@ -36,15 +36,15 @@ def run_file(file_path: str):
 
 
 def run(interpreter: Interpreter, source: str):
-    scanner = Scanner(source)
-
     try:
+        scanner = Scanner(source)
         tokens = scanner.scan_tokens()
-        for token in tokens:
-            print(token)
 
         parser = Parser(tokens)
         statements = parser.parse()
+
+        resolver = Resolver(interpreter)
+        resolver.resolve(statements)
 
         interpreter.interpret(statements)
 

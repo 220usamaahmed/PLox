@@ -21,6 +21,17 @@ class Environment:
 
         raise PLoxRuntimeError(name, f"Undefined variable {name.lexeme}.")
 
+    def get_at(self, distance: int, name: str) -> object:
+        environment = self.ancestor(distance)
+        return environment.values[name]
+
+    def ancestor(self, distance: int) -> "Environment":
+        environment: Environment = self
+        for _ in range(distance):
+            assert environment.enclosing is not None
+            environment = environment.enclosing
+        return environment
+
     def assign(self, name: Token, value: object):
         if name.lexeme in self.values:
             self.values[name.lexeme] = value
@@ -31,3 +42,6 @@ class Environment:
             return
 
         raise PLoxRuntimeError(name, f"Undefined variable {name.lexeme}.")
+
+    def assign_at(self, distance: int, name: Token, value: object):
+        self.ancestor(distance).values[name.lexeme] = value

@@ -3,9 +3,16 @@ import time
 
 from plox.ast.stmt_types import Function
 from plox.environment import Environment
+from enum import Enum
 
 if TYPE_CHECKING:
     from plox.interpreter import Interpreter
+
+
+class FunctionType(Enum):
+
+    NONE = "None"
+    FUNCTION = "Function"
 
 
 class Callable:
