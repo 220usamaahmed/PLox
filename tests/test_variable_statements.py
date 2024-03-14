@@ -2,7 +2,7 @@ from .utils import capture_stdout, run_code
 import textwrap
 
 
-def test(capture_stdout):
+def test_variable_scope(capture_stdout):
     source = """
         var a = "global a";
         var b = "global b";

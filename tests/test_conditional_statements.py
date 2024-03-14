@@ -3,7 +3,7 @@ from plox.parser import Parser
 from plox.scanner import Scanner
 
 
-def test():
+def test_if_else_statement():
     source = """
         var name = "Usama";
         var age = 25;
