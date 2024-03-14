@@ -21,8 +21,7 @@ EXPRESSIONS: List[Tuple[str, str]] = [
 STATEMENTS: List[Tuple[str, str]] = [
     ("Block", "statements: List[Stmt]"),
     ("Function", "name: Token, params: List[Token], body: List[Stmt]"),
-    ("Class",
-     "name: Token, superclass: Variable, method: List[Function]"),
+    ("Class", "name: Token, superclass: Variable, method: List[Function]"),
     ("Expression", "expression: Expr"),
     ("If", "condition: Expr, thenBranch: Stmt, elseBranch: Stmt"),
     ("Print", "expression: Expr"),
@@ -32,7 +31,9 @@ STATEMENTS: List[Tuple[str, str]] = [
 ]
 
 
-def generate_expr_types(content_type: Literal["Expr", "Stmt"], content: List[Tuple[str, str]]):
+def generate_expr_types(
+    content_type: Literal["Expr", "Stmt"], content: List[Tuple[str, str]]
+):
     code = f"""
         from typing import TYPE_CHECKING, List
         from plox.token import Token
@@ -45,18 +46,25 @@ def generate_expr_types(content_type: Literal["Expr", "Stmt"], content: List[Tup
     class_code = ""
     for name, params in content:
         param_names = map(lambda x: x.split(":")[0], params.split(", "))
-        class_code += textwrap.dedent(f"""
+        class_code += textwrap.dedent(
+            f"""
             class {name}({content_type}):
 
                 def __init__(self, {params}):      
-        """)
+        """
+        )
         for param in param_names:
             class_code += f"{' ' * 8}self.{param} = {param}\n"
 
-        class_code += textwrap.indent(textwrap.dedent(f"""
+        class_code += textwrap.indent(
+            textwrap.dedent(
+                f"""
             def accept(self, visitor: '{content_type}Visitor'):
                 return visitor.visit_{name.lower()}_{content_type.lower()}(self)
-        """), "    ")
+        """
+            ),
+            "    ",
+        )
 
         class_code += "\n"
 
@@ -69,7 +77,9 @@ def generate_expr_types(content_type: Literal["Expr", "Stmt"], content: List[Tup
     create_file(join(OUTPUT_PATH, f"{content_type.lower()}_types.py"), code)
 
 
-def generate_expr_visitor(content_type: Literal["Expr", "Stmt"], content: List[Tuple[str, str]]):
+def generate_expr_visitor(
+    content_type: Literal["Expr", "Stmt"], content: List[Tuple[str, str]]
+):
     imports = ", ".join(map(lambda x: x[0], content))
     code = f"""
         from plox.ast.{content_type.lower()}_types import {imports}
@@ -90,8 +100,11 @@ def generate_expr_visitor(content_type: Literal["Expr", "Stmt"], content: List[T
     create_file(join(OUTPUT_PATH, f"{content_type.lower()}_visitor.py"), code)
 
 
-def generate_expr_interface(content_type: Literal["Expr", "Stmt"], content: List[Tuple[str, str]]):
-    code = textwrap.dedent(f"""
+def generate_expr_interface(
+    content_type: Literal["Expr", "Stmt"], content: List[Tuple[str, str]]
+):
+    code = textwrap.dedent(
+        f"""
         from typing import TYPE_CHECKING, Any
         if TYPE_CHECKING:
             from plox.ast.{content_type.lower()}_visitor import {content_type}Visitor
@@ -101,10 +114,10 @@ def generate_expr_interface(content_type: Literal["Expr", "Stmt"], content: List
 
             def accept(self, visitor: '{content_type}Visitor') -> Any:
                 raise Exception('accept(visitor: {content_type}Visitor) is not implemented')
-    """).strip()
+    """
+    ).strip()
 
-    create_file(
-        join(OUTPUT_PATH, f"{content_type.lower()}_interface.py"), code)
+    create_file(join(OUTPUT_PATH, f"{content_type.lower()}_interface.py"), code)
 
 
 def generate_expressions():
@@ -119,10 +132,10 @@ def generate_expressions():
     generate_expr_types("Stmt", STATEMENTS)
 
 
-def create_file(path: str, code: str = ''):
+def create_file(path: str, code: str = ""):
     print(f"Creating file {path}")
 
-    with open(path, '+a') as file:
+    with open(path, "+a") as file:
         file.write(code)
 
 
@@ -139,5 +152,5 @@ def main():
     generate_expressions()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

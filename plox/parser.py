@@ -49,9 +49,27 @@ varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 
 from typing import Literal as TypeLiteral, List
 from plox.ast.expr_interface import Expr
-from plox.ast.expr_types import Assign, Binary, Call, Grouping, Logical, Unary, Literal, Variable
+from plox.ast.expr_types import (
+    Assign,
+    Binary,
+    Call,
+    Grouping,
+    Logical,
+    Unary,
+    Literal,
+    Variable,
+)
 from plox.ast.stmt_interface import Stmt
-from plox.ast.stmt_types import Block, Expression, Function, If, Print, Return, VariableDeclaration, While
+from plox.ast.stmt_types import (
+    Block,
+    Expression,
+    Function,
+    If,
+    Print,
+    Return,
+    VariableDeclaration,
+    While,
+)
 from plox.exceptions import ParserError, ParserErrorType
 from plox.token import Token, TokenType
 
@@ -76,8 +94,8 @@ class Parser:
                 return self.function("function")
 
             if self.match(TokenType.VAR):
-                return self.var_declaration();
-            
+                return self.var_declaration()
+
             return self.statement()
         except ParserError:
             self.synchronize()
@@ -86,7 +104,7 @@ class Parser:
         if self.match(TokenType.FOR):
             return self.for_statement()
 
-        if self.match(TokenType.IF): 
+        if self.match(TokenType.IF):
             return self.if_statement()
 
         if self.match(TokenType.PRINT):
@@ -102,7 +120,7 @@ class Parser:
             return Block(self.block())
 
         return self.expression_statement()
-    
+
     def for_statement(self) -> Stmt:
         self.consume(TokenType.LEFT_PAREN, ParserErrorType.MISSING_LEFT_PARAN)
 
@@ -130,10 +148,7 @@ class Parser:
         body = self.statement()
 
         if increment is not None:
-            body = Block([
-                body,
-                Expression(increment)
-            ])
+            body = Block([body, Expression(increment)])
 
         body = While(condition, body)
 
@@ -146,9 +161,16 @@ class Parser:
         expr = self.expression()
         self.consume(TokenType.SEMI_COLON, ParserErrorType.MISSING_SEMI_COLON)
         return Expression(expr)
-    
+
     def function(self, kind: TypeLiteral["function", "method"]):
-        name = self.consume(TokenType.IDENTIFIER, ParserErrorType.EXPECTED_FUNCTION_NAME if kind == "function" else ParserErrorType.EXPECTED_METHOD_NAME)
+        name = self.consume(
+            TokenType.IDENTIFIER,
+            (
+                ParserErrorType.EXPECTED_FUNCTION_NAME
+                if kind == "function"
+                else ParserErrorType.EXPECTED_METHOD_NAME
+            ),
+        )
         self.consume(TokenType.LEFT_PAREN, ParserErrorType.MISSING_LEFT_PARAN)
         parameters = []
         if not self.check(TokenType.RIGHT_PAREN):
@@ -156,14 +178,17 @@ class Parser:
                 if len(parameters) >= 255:
                     # TODO: Handle parser error
                     raise Exception("Can't have more than 255 parameters")
-                parameters.append(self.consume(TokenType.IDENTIFIER, ParserErrorType.MISSING_IDENTIFIER))
+                parameters.append(
+                    self.consume(
+                        TokenType.IDENTIFIER, ParserErrorType.MISSING_IDENTIFIER
+                    )
+                )
                 if not self.match(TokenType.COMMA):
                     break
         self.consume(TokenType.RIGHT_PAREN, ParserErrorType.MISSING_RIGHT_PARAN)
         self.consume(TokenType.LEFT_BRACE, ParserErrorType.MISSING_OPENING_BRACE)
         body = self.block()
         return Function(name, parameters, body)
-
 
     def block(self) -> List[Stmt]:
         statements: List[Stmt] = []
@@ -190,10 +215,10 @@ class Parser:
         value = self.expression()
         self.consume(TokenType.SEMI_COLON, ParserErrorType.MISSING_SEMI_COLON)
         return Print(value)
-    
+
     def return_statement(self) -> Stmt:
         keyword = self.previous()
-        value = self.expression() if not self.check(TokenType.SEMI_COLON) else None 
+        value = self.expression() if not self.check(TokenType.SEMI_COLON) else None
         self.consume(TokenType.SEMI_COLON, ParserErrorType.MISSING_SEMI_COLON)
         return Return(keyword, value)
 
@@ -203,7 +228,7 @@ class Parser:
         initializer = None
         if self.match(TokenType.EQUAL):
             initializer = self.expression()
-        
+
         self.consume(TokenType.SEMI_COLON, ParserErrorType.MISSING_SEMI_COLON)
         return VariableDeclaration(name, initializer)
 
@@ -217,7 +242,7 @@ class Parser:
 
     def expression(self) -> Expr:
         return self.assignment()
-    
+
     def assignment(self) -> Expr:
         expr = self.or_expr()
 
@@ -228,10 +253,10 @@ class Parser:
             if isinstance(expr, Variable):
                 name = expr.name
                 return Assign(name, value)
-            
+
             # TODO: Handle error reporting
-            print(f"Invalid assignment target. {equals}") 
-        
+            print(f"Invalid assignment target. {equals}")
+
         return expr
 
     def or_expr(self) -> Expr:
@@ -253,7 +278,6 @@ class Parser:
             expr = Logical(expr, operator, right)
 
         return expr
-    
 
     def equality(self) -> Expr:
         expr = self.comparison()
@@ -268,8 +292,12 @@ class Parser:
     def comparison(self) -> Expr:
         expr = self.term()
 
-        while self.match(TokenType.GREATER, TokenType.GREATER_EQUAL,
-                         TokenType.LESS, TokenType.LESS_EQUAL):
+        while self.match(
+            TokenType.GREATER,
+            TokenType.GREATER_EQUAL,
+            TokenType.LESS,
+            TokenType.LESS_EQUAL,
+        ):
             operator = self.previous()
             right = self.term()
             expr = Binary(expr, operator, right)
@@ -312,16 +340,16 @@ class Parser:
                 expr = self.finish_call(expr)
             else:
                 break
-        
+
         return expr
 
     def primary(self) -> Expr:
         if self.match(TokenType.FALSE):
             return Literal(False)
-        
+
         if self.match(TokenType.TRUE):
             return Literal(True)
-        
+
         if self.match(TokenType.NIL):
             return Literal(None)
 
@@ -333,8 +361,7 @@ class Parser:
 
         if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()
-            self.consume(TokenType.RIGHT_PAREN,
-                         ParserErrorType.MISSING_RIGHT_PARAN)
+            self.consume(TokenType.RIGHT_PAREN, ParserErrorType.MISSING_RIGHT_PARAN)
             return Grouping(expr)
 
         token = self.peek()
@@ -342,16 +369,15 @@ class Parser:
             location = "End of line"
         else:
             location = f"Near '{token.lexeme}'"
-        raise ParserError(token.line, location,
-                          ParserErrorType.EXPRESSION_EXPECTED)
-    
+        raise ParserError(token.line, location, ParserErrorType.EXPRESSION_EXPECTED)
+
     def finish_call(self, callee: Expr) -> Expr:
         arguments = []
         if not self.check(TokenType.RIGHT_PAREN):
             while True:
                 if len(arguments) >= 255:
                     # TODO: These kind of errors still need to be properly handled
-                    raise Exception("Can't have more than 255 arguments") 
+                    raise Exception("Can't have more than 255 arguments")
 
                 arguments.append(self.expression())
                 if not self.match(TokenType.COMMA):
@@ -360,7 +386,6 @@ class Parser:
         paren = self.consume(TokenType.RIGHT_PAREN, ParserErrorType.MISSING_RIGHT_PARAN)
 
         return Call(callee, paren, arguments)
-
 
     def match(self, *types: TokenType) -> bool:
         for type in types:

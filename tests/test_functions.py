@@ -12,7 +12,8 @@ def test_argument_passing(capture_stdout):
     """
 
     run_code(source, capture_stdout)
-    assert capture_stdout["stdout"] == "Hi, Dear Reader!\n" 
+    assert capture_stdout["stdout"] == "Hi, Dear Reader!\n"
+
 
 def test_return_statement(capture_stdout):
     source = """
@@ -26,7 +27,9 @@ def test_return_statement(capture_stdout):
         }
     """
 
-    expected = textwrap.dedent("""
+    expected = (
+        textwrap.dedent(
+            """
         1: 1
         2: 1
         3: 2
@@ -36,10 +39,14 @@ def test_return_statement(capture_stdout):
         7: 13
         8: 21
         9: 34
-    """).strip() + "\n"
+    """
+        ).strip()
+        + "\n"
+    )
 
     run_code(source, capture_stdout)
     assert expected == capture_stdout["stdout"]
+
 
 def test_closures(capture_stdout):
     source = """
@@ -59,11 +66,16 @@ def test_closures(capture_stdout):
         counter(); // "3".
     """
 
-    expected = textwrap.dedent("""
+    expected = (
+        textwrap.dedent(
+            """
         1
         2
         3
-    """).strip() + "\n"
+    """
+        ).strip()
+        + "\n"
+    )
 
     run_code(source, capture_stdout)
     assert expected == capture_stdout["stdout"]

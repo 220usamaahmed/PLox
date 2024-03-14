@@ -25,7 +25,9 @@ def test(capture_stdout):
         print c;    
     """
 
-    expected = textwrap.dedent("""
+    expected = (
+        textwrap.dedent(
+            """
         inner a
         outer b
         global c
@@ -35,7 +37,10 @@ def test(capture_stdout):
         global a
         global b
         global c
-    """).strip() + "\n"
+    """
+        ).strip()
+        + "\n"
+    )
 
     run_code(source, capture_stdout)
-    assert capture_stdout["stdout"] == expected 
+    assert capture_stdout["stdout"] == expected

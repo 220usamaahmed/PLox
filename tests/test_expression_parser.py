@@ -81,5 +81,6 @@ def test_comparison():
 
 def test_complex_expression():
     source = "(1 + 2 / 2) * -1 >= 0 == false"
-    assert parse(
-        source) == "(== (>= (* (group (+ 1.0 (/ 2.0 2.0))) (- 1.0)) 0.0) False)"
+    assert (
+        parse(source) == "(== (>= (* (group (+ 1.0 (/ 2.0 2.0))) (- 1.0)) 0.0) False)"
+    )

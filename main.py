@@ -13,7 +13,7 @@ def run_repl():
 
     while True:
         contents = input("> ").strip()
-        if contents == 'quit':
+        if contents == "quit":
             break
         run(interpretor, contents)
 
@@ -21,7 +21,7 @@ def run_repl():
 def run_file(file_path: str):
     print(f"Running script: {file_path}")
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, "r") as file:
             contents = file.read()
             run(contents)
     except FileNotFoundError:
@@ -47,7 +47,7 @@ def run(interpreter: Interpreter, source: str):
 
         interpreter.interpret(statements)
 
-        if (scanner.had_error):
+        if scanner.had_error:
             exit(65)
         if interpreter.had_runtime_error:
             exit(70)

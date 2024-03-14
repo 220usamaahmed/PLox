@@ -1,9 +1,27 @@
 from typing import Any, List
 from plox.ast.expr_interface import Expr
-from plox.ast.expr_types import Assign, Binary, Call, Grouping, Literal, Logical, Unary, Variable
+from plox.ast.expr_types import (
+    Assign,
+    Binary,
+    Call,
+    Grouping,
+    Literal,
+    Logical,
+    Unary,
+    Variable,
+)
 from plox.ast.expr_visitor import ExprVisitor
 from plox.ast.stmt_interface import Stmt
-from plox.ast.stmt_types import Block, Expression, Function, If, Print, Return, VariableDeclaration, While
+from plox.ast.stmt_types import (
+    Block,
+    Expression,
+    Function,
+    If,
+    Print,
+    Return,
+    VariableDeclaration,
+    While,
+)
 from plox.ast.stmt_visitor import StmtVisitor
 from plox.functions import Callable, Clock, PLoxFunction, ReturnException
 from plox.environment import Environment
@@ -71,14 +89,16 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def visit_literal_expr(self, expr: Literal) -> Any:
         return expr.value
-    
+
     def visit_logical_expr(self, expr: Logical) -> Any:
         left = self.evaluate(expr.left)
 
         if expr.operator.token_type == TokenType.OR:
-            if self.is_truthy(left): return left
+            if self.is_truthy(left):
+                return left
         else:
-            if not self.is_truthy(left): return left
+            if not self.is_truthy(left):
+                return left
 
         return self.evaluate(expr.right)
 
@@ -97,8 +117,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
                 return not self.is_truthy(right)
 
             case _:
-                raise InterpreterError(
-                    InterpreterErrorType.INVALID_UNARY_OPERATOR)
+                raise InterpreterError(InterpreterErrorType.INVALID_UNARY_OPERATOR)
 
     def visit_binary_expr(self, expr: Binary) -> Any:
         left = self.evaluate(expr.left)
@@ -139,7 +158,8 @@ class Interpreter(ExprVisitor, StmtVisitor):
                     return str(self.stringify(left)) + str(self.stringify(right))
 
                 raise RuntimeError(
-                    expr.operator, "Operands must be two numbers or two strings")
+                    expr.operator, "Operands must be two numbers or two strings"
+                )
 
             case TokenType.SLASH:
                 self.check_number_operand(expr.operator, left, right)
@@ -150,8 +170,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
                 return float(left) * float(right)
 
             case _:
-                raise InterpreterError(
-                    InterpreterErrorType.INVALID_BINARY_OPERATOR)
+                raise InterpreterError(InterpreterErrorType.INVALID_BINARY_OPERATOR)
 
     def visit_call_expr(self, expr: Call) -> Any:
         callee: Callable = self.evaluate(expr.callee)
@@ -164,7 +183,10 @@ class Interpreter(ExprVisitor, StmtVisitor):
             arguments.append(self.evaluate(argument))
 
         if len(arguments) != callee.arity():
-            raise PLoxRuntimeError(expr.paren, f"Expected {callee.arity()} arguments but got {len(arguments)}.")
+            raise PLoxRuntimeError(
+                expr.paren,
+                f"Expected {callee.arity()} arguments but got {len(arguments)}.",
+            )
 
         return callee.call(self, arguments)
 
@@ -177,7 +199,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def evaluate(self, expr: Expr):
         return expr.accept(self)
-    
+
     def execute_block(self, statements: List[Stmt], environment: Environment):
         previous_env = self.environment
 
@@ -191,9 +213,9 @@ class Interpreter(ExprVisitor, StmtVisitor):
             self.environment = previous_env
 
     def is_truthy(self, object: Any) -> bool:
-        if (object == None):
+        if object == None:
             return False
-        if (isinstance(object, bool)):
+        if isinstance(object, bool):
             return object
         return True
 
