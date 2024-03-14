@@ -40,7 +40,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
         self.evaluate(stmt.expression)
 
     def visit_function_stmt(self, stmt: Function) -> Any:
-        function = PLoxFunction(stmt)
+        function = PLoxFunction(stmt, self.environment)
         self.environment.define(stmt.name.lexeme, function)
 
     def visit_if_stmt(self, stmt: If) -> Any:
@@ -136,7 +136,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
                     return float(left) + float(right)
 
                 if isinstance(left, str) or isinstance(right, str):
-                    return str(left) + str(right)
+                    return str(self.stringify(left)) + str(self.stringify(right))
 
                 raise RuntimeError(
                     expr.operator, "Operands must be two numbers or two strings")

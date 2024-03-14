@@ -29,11 +29,12 @@ class Clock(Callable):
 
 class PLoxFunction(Callable):
 
-    def __init__(self, declaration: Function):
+    def __init__(self, declaration: Function, closure: Environment):
         self.declaration = declaration
+        self.closure = closure
 
     def call(self, interpreter: 'Interpreter', arguments: List[object]):
-        environment = Environment(interpreter.globals)
+        environment = Environment(self.closure)
         for i, params in enumerate(self.declaration.params):
             environment.define(params.lexeme, arguments[i])
         try:
