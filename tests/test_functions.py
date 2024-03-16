@@ -84,3 +84,31 @@ def test_closures(capture_stdout):
 
     run_code(source, capture_stdout)
     assert expected == capture_stdout["stdout"]
+
+
+def test_closure_binding(capture_stdout):
+    source = """
+        var a = "global";
+        {
+        fun showA() {
+            print a;
+        }
+
+        showA();
+        var a = "block";
+        showA();
+        }
+    """
+
+    expected = (
+        textwrap.dedent(
+            """
+        global
+        global
+    """
+        ).strip()
+        + "\n"
+    )
+
+    run_code(source, capture_stdout)
+    assert expected == capture_stdout["stdout"]
