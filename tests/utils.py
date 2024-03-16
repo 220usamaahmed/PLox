@@ -2,6 +2,7 @@ import pytest
 import sys
 from plox.interpreter import Interpreter
 from plox.parser import Parser
+from plox.resolver import Resolver
 from plox.scanner import Scanner
 
 
@@ -18,11 +19,15 @@ def capture_stdout(monkeypatch):
 
 
 def run_code(code: str, capture_stdout) -> str:
+    interpreter = Interpreter()
+
     scanner = Scanner(code)
     tokens = scanner.scan_tokens()
 
     parser = Parser(tokens)
     statements = parser.parse()
 
-    interpreter = Interpreter()
+    resolver = Resolver(interpreter)
+    resolver.resolve(statements)
+
     interpreter.interpret(statements)

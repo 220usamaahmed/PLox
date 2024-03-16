@@ -1,6 +1,11 @@
 import textwrap
 from .utils import capture_stdout, run_code
 
+from plox.interpreter import Interpreter
+from plox.parser import Parser
+from plox.resolver import Resolver
+from plox.scanner import Scanner
+
 
 def test_argument_passing(capture_stdout):
     source = """

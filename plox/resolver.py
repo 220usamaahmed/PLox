@@ -72,7 +72,7 @@ class Resolver(ExprVisitor, StmtVisitor):
         self.scopes[-1][name.lexeme] = True
 
     def resolve_local(self, expr: Expr, name: Token):
-        for i in reversed(range(len(self.scopes) - 1)):
+        for i in reversed(range(len(self.scopes))):
             if name.lexeme in self.scopes[i].keys():
                 self.interpreter.resolve(expr, len(self.scopes) - 1 - i)
                 return
@@ -97,7 +97,10 @@ class Resolver(ExprVisitor, StmtVisitor):
         self.define(stmt.name)
 
     def visit_variable_expr(self, expr: Variable) -> Any:
-        if not len(self.scopes) == 0 and not self.scopes[-1][expr.name.lexeme]:
+        if (
+            not (len(self.scopes) == 0)
+            and self.scopes[-1].get(expr.name.lexeme) == False
+        ):
             raise Exception("Can't read local variable in its own initializer.")
 
         self.resolve_local(expr, expr.name)
