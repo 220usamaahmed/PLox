@@ -1,5 +1,4 @@
 from .utils import capture_stdout, run_code
-import pytest
 
 
 def test_while_loop(capture_stdout):
@@ -11,7 +10,7 @@ def test_while_loop(capture_stdout):
         }    
     """
 
-    run_code(source, capture_stdout)
+    run_code(source)
     assert capture_stdout["stdout"] == "\n".join(map(str, list(range(10)))) + "\n"
 
 
@@ -22,5 +21,5 @@ def test_for_loop(capture_stdout):
         }
     """
 
-    run_code(source, capture_stdout)
+    run_code(source)
     assert capture_stdout["stdout"] == "\n".join(map(str, list(range(10)))) + "\n"

@@ -16,7 +16,7 @@ def test_argument_passing(capture_stdout):
         sayHi("Dear", "Reader");
     """
 
-    run_code(source, capture_stdout)
+    run_code(source)
     assert capture_stdout["stdout"] == "Hi, Dear Reader!\n"
 
 
@@ -49,7 +49,7 @@ def test_return_statement(capture_stdout):
         + "\n"
     )
 
-    run_code(source, capture_stdout)
+    run_code(source)
     assert expected == capture_stdout["stdout"]
 
 
@@ -82,7 +82,7 @@ def test_closures(capture_stdout):
         + "\n"
     )
 
-    run_code(source, capture_stdout)
+    run_code(source)
     assert expected == capture_stdout["stdout"]
 
 
@@ -110,5 +110,5 @@ def test_closure_binding(capture_stdout):
         + "\n"
     )
 
-    run_code(source, capture_stdout)
+    run_code(source)
     assert expected == capture_stdout["stdout"]

@@ -4,9 +4,12 @@ from plox.ast.expr_types import (
     Assign,
     Binary,
     Call,
+    Get,
     Grouping,
     Literal,
     Logical,
+    Set,
+    This,
     Unary,
     Variable,
 )
@@ -14,6 +17,7 @@ from plox.ast.expr_visitor import ExprVisitor
 from plox.ast.stmt_interface import Stmt
 from plox.ast.stmt_types import (
     Block,
+    Class,
     Expression,
     Function,
     If,
@@ -23,6 +27,7 @@ from plox.ast.stmt_types import (
     While,
 )
 from plox.ast.stmt_visitor import StmtVisitor
+from plox.oop import PLoxClass, PLoxInstance
 from plox.functions import Callable, Clock, PLoxFunction, ReturnException
 from plox.environment import Environment
 from plox.exceptions import InterpreterError, InterpreterErrorType, PLoxRuntimeError
@@ -57,6 +62,17 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def visit_block_stmt(self, stmt: Block) -> Any:
         self.execute_block(stmt.statements, Environment(self.environment))
+
+    def visit_class_stmt(self, stmt: Class) -> Any:
+        self.environment.define(stmt.name.lexeme, None)
+
+        methods: Dict[str, PLoxFunction] = {}
+        for method in stmt.methods:
+            function = PLoxFunction(method, self.environment)
+            methods[method.name.lexeme] = function
+
+        plox_class = PLoxClass(stmt.name.lexeme, methods)
+        self.environment.assign(stmt.name, plox_class)
 
     def visit_expression_stmt(self, stmt: Expression):
         self.evaluate(stmt.expression)
@@ -111,6 +127,28 @@ class Interpreter(ExprVisitor, StmtVisitor):
                 return left
 
         return self.evaluate(expr.right)
+
+    def visit_get_expr(self, expr: Get) -> Any:
+        object = self.evaluate(expr.object)
+
+        if isinstance(object, PLoxInstance):
+            return object.get(expr.name)
+
+        raise PLoxRuntimeError(expr.name, "Only instances have fields")
+
+    def visit_set_expr(self, expr: Set) -> Any:
+        object = self.evaluate(expr.object)
+
+        if not isinstance(object, PLoxInstance):
+            raise PLoxRuntimeError(expr.name, "Only instances have fields")
+
+        value = self.evaluate(expr.value)
+
+        object.set(expr.name, value)
+        return value
+
+    def visit_this_expr(self, expr: This) -> Any:
+        return self.lookup_variables(expr.keyword, expr)
 
     def visit_grouping_expr(self, expr: Grouping) -> Any:
         return self.evaluate(expr.expression)

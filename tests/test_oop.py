@@ -1,0 +1,92 @@
+import textwrap
+from .utils import capture_stdout, run_code
+
+
+def test_argument_passing(capture_stdout):
+    source = """
+        class Foo {}
+        print Foo;
+
+        var foo = Foo();
+        print foo;
+    """
+
+    expected = (
+        textwrap.dedent(
+            """
+            Foo
+            Foo instance
+    """
+        ).strip()
+        + "\n"
+    )
+
+    run_code(source)
+    assert capture_stdout["stdout"] == expected
+
+
+def test_field_geter_and_seter(capture_stdout):
+    source = """
+        class Foo {}
+        var foo = Foo();
+
+        foo.bar = "baz";
+        print foo.bar;
+    """
+
+    run_code(source)
+    assert capture_stdout["stdout"] == "baz\n"
+
+
+def test_method_call(capture_stdout):
+    source = """
+        class Foo {
+            bar() {
+                print "baz";
+            }
+        }
+
+        var foo = Foo();
+        foo.bar();
+    """
+
+    run_code(source)
+    assert capture_stdout["stdout"] == "baz\n"
+
+
+def test_this(capture_stdout):
+    source = """
+        class Cake {
+            taste() {
+                var adjective = "delicious";
+                print "The " + this.flavor + " cake is " + adjective + "!";
+            }
+        }
+
+        var cake = Cake();
+        cake.flavor = "German chocolate";
+        cake.taste(); // Prints "The German chocolate cake is delicious!".
+    """
+
+    run_code(source)
+    assert capture_stdout["stdout"] == "The German chocolate cake is delicious!\n"
+
+
+def test_this_with_callbacks(capture_stdout):
+    source = """
+        class Thing {
+        getCallback() {
+            fun localFunction() {
+                print this;
+                }
+
+                return localFunction;
+            }
+        }
+
+        var callback = Thing().getCallback();
+        callback();
+    """
+
+    run_code(source)
+    assert capture_stdout["stdout"] == "Thing instance\n"

@@ -5,7 +5,6 @@ from plox.ast.expr_interface import Expr
 if TYPE_CHECKING:
     from plox.ast.stmt_visitor import StmtVisitor
 from plox.ast.stmt_interface import Stmt
-from plox.ast.expr_types import Variable
 
 
 class Block(Stmt):
@@ -30,10 +29,9 @@ class Function(Stmt):
 
 class Class(Stmt):
 
-    def __init__(self, name: Token, superclass: Variable, method: List[Function]):
+    def __init__(self, name: Token, methods: List[Function]):
         self.name = name
-        self.superclass = superclass
-        self.method = method
+        self.methods = methods
 
     def accept(self, visitor: "StmtVisitor"):
         return visitor.visit_class_stmt(self)

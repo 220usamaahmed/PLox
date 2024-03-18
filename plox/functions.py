@@ -3,16 +3,10 @@ import time
 
 from plox.ast.stmt_types import Function
 from plox.environment import Environment
-from enum import Enum
 
 if TYPE_CHECKING:
+    from plox.oop import PLoxInstance
     from plox.interpreter import Interpreter
-
-
-class FunctionType(Enum):
-
-    NONE = "None"
-    FUNCTION = "Function"
 
 
 class Callable:
@@ -53,6 +47,11 @@ class PLoxFunction(Callable):
         except ReturnException as e:
             return e.value
         return None
+
+    def bind(self, instance: "PLoxInstance"):
+        environment = Environment(self.closure)
+        environment.define("this", instance)
+        return PLoxFunction(self.declaration, environment)
 
     def arity(self) -> int:
         return len(self.declaration.params)

@@ -42,5 +42,5 @@ def test_variable_scope(capture_stdout):
         + "\n"
     )
 
-    run_code(source, capture_stdout)
+    run_code(source)
     assert capture_stdout["stdout"] == expected

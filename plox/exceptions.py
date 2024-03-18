@@ -5,8 +5,8 @@ from plox.token import Token
 
 class ScannerErrorType(Enum):
 
-    UNTERMINATED_STRING = "Unterminated String"
-    UNEXPECTED_CHARACTER = "Unexpected Character"
+    UNTERMINATED_STRING = "Unterminated string"
+    UNEXPECTED_CHARACTER = "Unexpected character"
 
 
 class ScannerError(Exception):
@@ -21,15 +21,17 @@ class ScannerError(Exception):
 
 class ParserErrorType(Enum):
 
-    MISSING_LEFT_PARAN = "Missing Left Paran"
-    MISSING_RIGHT_PARAN = "Missing Right Paran"
+    MISSING_LEFT_PARAN = "Missing left paran"
+    MISSING_RIGHT_PARAN = "Missing right paran"
     MISSING_OPENING_BRACE = "Missing opening brace"
     MISSING_CLOSING_BRACE = "Missing closing brace"
-    MISSING_SEMI_COLON = "Missing Semi Colon"
-    EXPRESSION_EXPECTED = "Expression Expected"
+    MISSING_SEMI_COLON = "Missing semi colon"
+    EXPRESSION_EXPECTED = "Expression expected"
     EXPECTED_FUNCTION_NAME = "Expected function name"
+    EXPECTED_CLASS_NAME = "Expected class name"
     EXPECTED_METHOD_NAME = "Expected method name"
-    MISSING_IDENTIFIER = "Missing Identifier"
+    EXPECTED_PROPERTY_NAME = "Expected property name"
+    MISSING_IDENTIFIER = "Missing identifier"
 
 
 class ParserError(Exception):
@@ -44,8 +46,8 @@ class ParserError(Exception):
 
 class InterpreterErrorType(Enum):
 
-    INVALID_UNARY_OPERATOR = "Invalid Unary Operator"
-    INVALID_BINARY_OPERATOR = "Invalid Binary Operator"
+    INVALID_UNARY_OPERATOR = "Invalid unary operator"
+    INVALID_BINARY_OPERATOR = "Invalid binary operator"
 
 
 class InterpreterError(Exception):

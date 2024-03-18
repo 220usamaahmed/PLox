@@ -2,7 +2,7 @@
 EXPRESSION GRAMMAR
 ------------------
 expression     → assignment ;
-assignment     → IDENTIFIER "=" assignment
+assignment     → ( call "." )? IDENTIFIER "=" assignment
                | logic_or ;
 logic_or       → logic_and ( "or" logic_and )* ;
 logic_and      → equality ( "and" equality )* ; 
@@ -11,7 +11,7 @@ comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           → factor ( ( "-" | "+" ) factor )* ;
 factor         → unary ( ( "/" | "*" ) unary )* ;
 unary          → ( "!" | "-" ) unary | call ;
-call           → primary ( "(" arguments? ")" )* ;
+call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 arguments      → expression ( "," expression )* ;
 primary        → "true" | "false" | "nil"
                | NUMBER | STRING
@@ -22,9 +22,11 @@ primary        → "true" | "false" | "nil"
 STATEMENT GRAMMAR
 -----------------
 program        → declaration* EOF ;
-declaration    → funDecl
+declaration    → classDecl
+               | funDecl
                | varDecl
                | statement ;
+classDecl      → "class" IDENTIFIER "{" function* "}" ;
 funDecl        → "fun" function ;
 function       → IDENTIFIER "(" parameters? ")" block ;
 statement      → exprStmt
@@ -53,8 +55,11 @@ from plox.ast.expr_types import (
     Assign,
     Binary,
     Call,
+    Get,
     Grouping,
     Logical,
+    Set,
+    This,
     Unary,
     Literal,
     Variable,
@@ -62,6 +67,7 @@ from plox.ast.expr_types import (
 from plox.ast.stmt_interface import Stmt
 from plox.ast.stmt_types import (
     Block,
+    Class,
     Expression,
     Function,
     If,
@@ -91,6 +97,9 @@ class Parser:
 
     def declaration(self) -> Stmt | None:
         try:
+            if self.match(TokenType.CLASS):
+                return self.class_declaration()
+
             if self.match(TokenType.FUN):
                 return self.function("function")
 
@@ -101,6 +110,18 @@ class Parser:
         except ParserError:
             self.synchronize()
             return None
+
+    def class_declaration(self) -> Stmt:
+        name = self.consume(TokenType.IDENTIFIER, ParserErrorType.EXPECTED_CLASS_NAME)
+        self.consume(TokenType.LEFT_BRACE, ParserErrorType.MISSING_OPENING_BRACE)
+
+        methods: List[Function] = []
+        while not self.check(TokenType.RIGHT_BRACE) and not self.is_at_end():
+            methods.append(self.function("method"))
+
+        self.consume(TokenType.RIGHT_BRACE, ParserErrorType.MISSING_CLOSING_BRACE)
+
+        return Class(name, methods)
 
     def statement(self) -> Stmt:
         if self.match(TokenType.FOR):
@@ -256,6 +277,9 @@ class Parser:
             if isinstance(expr, Variable):
                 name = expr.name
                 return Assign(name, value)
+            elif isinstance(expr, Get):
+                assert isinstance(expr, Get)
+                return Set(expr.object, expr.name, value)
 
             # TODO: Handle error reporting
             print(f"Invalid assignment target. {equals}")
@@ -305,6 +329,7 @@ class Parser:
             right = self.term()
             expr = Binary(expr, operator, right)
 
+        assert isinstance(expr, Expr)
         return expr
 
     def term(self) -> Expr:
@@ -341,6 +366,11 @@ class Parser:
         while True:
             if self.match(TokenType.LEFT_PAREN):
                 expr = self.finish_call(expr)
+            elif self.match(TokenType.DOT):
+                name = self.consume(
+                    TokenType.IDENTIFIER, ParserErrorType.EXPECTED_PROPERTY_NAME
+                )
+                expr = Get(expr, name)
             else:
                 break
 
@@ -358,6 +388,9 @@ class Parser:
 
         if self.match(TokenType.NUMBER, TokenType.STRING):
             return Literal(self.previous().value)
+
+        if self.match(TokenType.THIS):
+            return This(self.previous())
 
         if self.match(TokenType.IDENTIFIER):
             return Variable(self.previous())

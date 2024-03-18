@@ -10,7 +10,10 @@ from plox.scanner import Scanner
 def capture_stdout(monkeypatch):
     buffer = {"stdout": "", "write_calls": 0}
 
-    def fake_write(s):
+    def fake_write(s: str):
+        assert isinstance(buffer["stdout"], str)
+        assert isinstance(buffer["write_calls"], int)
+
         buffer["stdout"] += s
         buffer["write_calls"] += 1
 
@@ -18,7 +21,7 @@ def capture_stdout(monkeypatch):
     return buffer
 
 
-def run_code(code: str, capture_stdout) -> str:
+def run_code(code: str):
     interpreter = Interpreter()
 
     scanner = Scanner(code)
