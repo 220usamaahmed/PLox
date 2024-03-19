@@ -90,3 +90,23 @@ def test_this_with_callbacks(capture_stdout):
 
     run_code(source)
     assert capture_stdout["stdout"] == "Thing instance\n"
+
+
+def test_initializer(capture_stdout):
+    source = """
+    class Circle {
+        init(radius) {
+            this.radius = radius;
+        }
+
+        area() {
+            return 3.141592653 * this.radius * this.radius;
+        }
+    }
+
+    var circle = Circle(4);
+    print circle.area(); // Prints roughly "50.2655".
+    """
+
+    run_code(source)
+    assert capture_stdout["stdout"].startswith("50.265")

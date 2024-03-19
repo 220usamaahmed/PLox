@@ -36,6 +36,7 @@ class FunctionType(Enum):
 
     NONE = "None"
     FUNCTION = "Function"
+    INITIALIZER = "Initializer"
     METHOD = "Method"
 
 
@@ -149,6 +150,9 @@ class Resolver(ExprVisitor, StmtVisitor):
         if self.current_function == FunctionType.NONE:
             raise Exception("Can't return from top-level code")
 
+        if self.current_function == FunctionType.INITIALIZER:
+            raise Exception("Can't return a value from an initializer")
+
         if stmt.expr is not None:
             self.resolve_expr(stmt.expr)
 
@@ -190,7 +194,7 @@ class Resolver(ExprVisitor, StmtVisitor):
         self.scopes[-1]["this"] = True
 
         for method in stmt.methods:
-            declaration = FunctionType.METHOD
+            declaration = FunctionType.INITIALIZER if method.name == "init" else FunctionType.METHOD
             self.resolve_function(method, declaration)
 
         self.end_scope()

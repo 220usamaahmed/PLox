@@ -68,7 +68,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
         methods: Dict[str, PLoxFunction] = {}
         for method in stmt.methods:
-            function = PLoxFunction(method, self.environment)
+            function = PLoxFunction(method, self.environment, method.name.lexeme == "init")
             methods[method.name.lexeme] = function
 
         plox_class = PLoxClass(stmt.name.lexeme, methods)
@@ -78,7 +78,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
         self.evaluate(stmt.expression)
 
     def visit_function_stmt(self, stmt: Function) -> Any:
-        function = PLoxFunction(stmt, self.environment)
+        function = PLoxFunction(stmt, self.environment, False)
         self.environment.define(stmt.name.lexeme, function)
 
     def visit_if_stmt(self, stmt: If) -> Any:

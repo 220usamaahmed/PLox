@@ -34,9 +34,10 @@ class Clock(Callable):
 
 class PLoxFunction(Callable):
 
-    def __init__(self, declaration: Function, closure: Environment):
+    def __init__(self, declaration: Function, closure: Environment, is_initializer: bool):
         self.declaration = declaration
         self.closure = closure
+        self.is_initializer = is_initializer
 
     def call(self, interpreter: "Interpreter", arguments: List[object]):
         environment = Environment(self.closure)
@@ -45,13 +46,16 @@ class PLoxFunction(Callable):
         try:
             interpreter.execute_block(self.declaration.body, environment)
         except ReturnException as e:
-            return e.value
+            return self.closure.get_at(0, "this") if self.is_initializer else e.value
+
+        if self.is_initializer: return self.closure.get_at(0, "this")
+
         return None
 
     def bind(self, instance: "PLoxInstance"):
         environment = Environment(self.closure)
         environment.define("this", instance)
-        return PLoxFunction(self.declaration, environment)
+        return PLoxFunction(self.declaration, environment, self.is_initializer)
 
     def arity(self) -> int:
         return len(self.declaration.params)
