@@ -64,6 +64,12 @@ class Interpreter(ExprVisitor, StmtVisitor):
         self.execute_block(stmt.statements, Environment(self.environment))
 
     def visit_class_stmt(self, stmt: Class) -> Any:
+        superclass = None
+        if stmt.superclass is not None:
+            superclass = self.evaluate(stmt.superclass)
+            if not isinstance(superclass, PLoxClass):
+                raise PLoxRuntimeError(stmt.superclass.name, "Superclass must be a class")
+
         self.environment.define(stmt.name.lexeme, None)
 
         methods: Dict[str, PLoxFunction] = {}
@@ -71,7 +77,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
             function = PLoxFunction(method, self.environment, method.name.lexeme == "init")
             methods[method.name.lexeme] = function
 
-        plox_class = PLoxClass(stmt.name.lexeme, methods)
+        plox_class = PLoxClass(stmt.name.lexeme, superclass, methods)
         self.environment.assign(stmt.name, plox_class)
 
     def visit_expression_stmt(self, stmt: Expression):

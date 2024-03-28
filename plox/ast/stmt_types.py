@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
+from plox.ast.expr_types import Variable
 from plox.token import Token
 from plox.ast.expr_interface import Expr
 
@@ -29,8 +30,9 @@ class Function(Stmt):
 
 class Class(Stmt):
 
-    def __init__(self, name: Token, methods: List[Function]):
+    def __init__(self, name: Token, superclass: Optional[ Variable ], methods: List[Function]):
         self.name = name
+        self.superclass = superclass
         self.methods = methods
 
     def accept(self, visitor: "StmtVisitor"):

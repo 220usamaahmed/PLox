@@ -26,7 +26,8 @@ declaration    → classDecl
                | funDecl
                | varDecl
                | statement ;
-classDecl      → "class" IDENTIFIER "{" function* "}" ;
+classDecl      → "class" IDENTIFIER ( "<" IDENTIFIER )?
+                 "{" function* "}" ;
 funDecl        → "fun" function ;
 function       → IDENTIFIER "(" parameters? ")" block ;
 statement      → exprStmt
@@ -49,7 +50,7 @@ block          → "{" declaration* "}"
 varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 """
 
-from typing import Literal as TypeLiteral, List
+from typing import Literal as TypeLiteral, List, Optional
 from plox.ast.expr_interface import Expr
 from plox.ast.expr_types import (
     Assign,
@@ -113,6 +114,12 @@ class Parser:
 
     def class_declaration(self) -> Stmt:
         name = self.consume(TokenType.IDENTIFIER, ParserErrorType.EXPECTED_CLASS_NAME)
+
+        superclass: Optional[Variable] = None
+        if self.match(TokenType.LESS):
+            self.consume(TokenType.IDENTIFIER, ParserErrorType.EXPECTED_SUPERCLASS_NAME)
+            superclass = Variable(self.previous())
+
         self.consume(TokenType.LEFT_BRACE, ParserErrorType.MISSING_OPENING_BRACE)
 
         methods: List[Function] = []
@@ -121,7 +128,7 @@ class Parser:
 
         self.consume(TokenType.RIGHT_BRACE, ParserErrorType.MISSING_CLOSING_BRACE)
 
-        return Class(name, methods)
+        return Class(name, superclass, methods)
 
     def statement(self) -> Stmt:
         if self.match(TokenType.FOR):

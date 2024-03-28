@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from plox.exceptions import PLoxRuntimeError
 from plox.functions import Callable, PLoxFunction
 from plox.token import Token
@@ -9,8 +9,9 @@ if TYPE_CHECKING:
 
 class PLoxClass(Callable):
 
-    def __init__(self, name: str, methods: Dict[str, PLoxFunction]) -> None:
+    def __init__(self, name: str, superclass: Optional["PLoxClass"], methods: Dict[str, PLoxFunction]) -> None:
         self.name = name
+        self.superclass = superclass
         self.methods = methods
 
     def __repr__(self) -> str:
@@ -32,7 +33,11 @@ class PLoxClass(Callable):
         return 0
 
     def find_method(self, name: str) -> PLoxFunction | None:
-        return self.methods.get(name)
+        if name in self.methods:
+            return self.methods[name]
+
+        if self.superclass is not None:
+            return self.superclass.methods.get(name)
 
 
 class PLoxInstance:

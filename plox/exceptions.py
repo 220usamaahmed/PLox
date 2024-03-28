@@ -29,6 +29,7 @@ class ParserErrorType(Enum):
     EXPRESSION_EXPECTED = "Expression expected"
     EXPECTED_FUNCTION_NAME = "Expected function name"
     EXPECTED_CLASS_NAME = "Expected class name"
+    EXPECTED_SUPERCLASS_NAME = "Expected superclass name"
     EXPECTED_METHOD_NAME = "Expected method name"
     EXPECTED_PROPERTY_NAME = "Expected property name"
     MISSING_IDENTIFIER = "Missing identifier"

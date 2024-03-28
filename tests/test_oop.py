@@ -110,3 +110,20 @@ def test_initializer(capture_stdout):
 
     run_code(source)
     assert capture_stdout["stdout"].startswith("50.265")
+
+
+def test_inheritance(capture_stdout):
+    source = """
+        class Doughnut {
+            cook() {
+                print "Fry until golden brown.";
+            }
+        }
+
+        class BostonCream < Doughnut {}
+
+        BostonCream().cook();
+    """
+
+    run_code(source)
+    assert capture_stdout["stdout"] == "Fry until golden brown.\n"
