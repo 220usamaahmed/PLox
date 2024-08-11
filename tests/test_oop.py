@@ -127,3 +127,29 @@ def test_inheritance(capture_stdout):
 
     run_code(source)
     assert capture_stdout["stdout"] == "Fry until golden brown.\n"
+
+
+def test_super(capture_stdout):
+    source = """
+        class Doughnut {
+            cook() {
+                print "Fry until golden brown.";
+            }
+        }
+
+        class BostonCream < Doughnut {
+            cook() {
+                super.cook();
+                print "Pipe full of custard and coat with chocolate.";
+            }
+        }
+
+        BostonCream().cook();
+    """
+
+    run_code(source)
+    assert (
+        capture_stdout["stdout"]
+        == "Fry until golden brown.\nPipe full of custard and coat with chocolate.\n"
+    )
+

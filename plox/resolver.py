@@ -13,6 +13,7 @@ from plox.ast.expr_types import (
     This,
     Unary,
     Variable,
+    Super,
 )
 from plox.ast.expr_visitor import ExprVisitor
 from plox.ast.stmt_interface import Stmt
@@ -44,6 +45,7 @@ class ClassType(Enum):
 
     NONE = "None"
     CLASS = "Class"
+    SUBCLASS = "Subclass"
 
 
 class Resolver(ExprVisitor, StmtVisitor):
@@ -190,20 +192,36 @@ class Resolver(ExprVisitor, StmtVisitor):
         self.declare(stmt.name)
         self.define(stmt.name)
 
-        if stmt.superclass is not None and stmt.name.lexeme == stmt.superclass.name.lexeme:
+        if (
+            stmt.superclass is not None
+            and stmt.name.lexeme == stmt.superclass.name.lexeme
+        ):
             raise Exception("A class can't inherit from itself.")
 
         if stmt.superclass is not None:
-            self.resolve_expr(stmt.superclass) 
+            self.current_class = ClassType.SUBCLASS
+            self.resolve_expr(stmt.superclass)
+
+        if stmt.superclass is not None:
+            self.begin_scope()
+            self.scopes[-1]["super"] = True
 
         self.begin_scope()
         self.scopes[-1]["this"] = True
 
         for method in stmt.methods:
-            declaration = FunctionType.INITIALIZER if method.name == "init" else FunctionType.METHOD
+            declaration = (
+                FunctionType.INITIALIZER
+                if method.name == "init"
+                else FunctionType.METHOD
+            )
             self.resolve_function(method, declaration)
 
         self.end_scope()
+
+        if stmt.superclass is not None:
+            self.end_scope()
+
         self.current_class = enclosing_class
 
     def visit_get_expr(self, expr: Get) -> Any:
@@ -212,6 +230,14 @@ class Resolver(ExprVisitor, StmtVisitor):
     def visit_set_expr(self, expr: Set) -> Any:
         self.resolve_expr(expr.value)
         self.resolve_expr(expr.object)
+
+    def visit_super_expr(self, expr: Super) -> Any:
+        if self.current_class == ClassType.NONE:
+            raise Exception("Can't use 'super' outside of a class")
+        elif self.current_class != ClassType.SUBCLASS:
+            raise Exception("Can't use 'super' in a class with no superclass.")
+
+        self.resolve_local(expr, expr.keyword)
 
     def visit_this_expr(self, expr: This) -> Any:
         if self.current_class == ClassType.NONE:

@@ -16,7 +16,8 @@ arguments      → expression ( "," expression )* ;
 primary        → "true" | "false" | "nil"
                | NUMBER | STRING
                | "(" expression ")"
-               | IDENTIFIER ;
+               | IDENTIFIER
+               | "super" "." IDENTIFIER ;
 
 
 STATEMENT GRAMMAR
@@ -64,6 +65,7 @@ from plox.ast.expr_types import (
     Unary,
     Literal,
     Variable,
+    Super,
 )
 from plox.ast.stmt_interface import Stmt
 from plox.ast.stmt_types import (
@@ -389,12 +391,19 @@ class Parser:
 
         if self.match(TokenType.TRUE):
             return Literal(True)
-
         if self.match(TokenType.NIL):
             return Literal(None)
 
         if self.match(TokenType.NUMBER, TokenType.STRING):
             return Literal(self.previous().value)
+
+        if self.match(TokenType.SUPER):
+            keyword = self.previous()
+            self.consume(TokenType.DOT, ParserErrorType.MISSING_DOT_AFTER_SUPER)
+            method = self.consume(
+                TokenType.IDENTIFIER, ParserErrorType.MISSING_SUPERCLASS_METHOD
+            )
+            return Super(keyword, method)
 
         if self.match(TokenType.THIS):
             return This(self.previous())

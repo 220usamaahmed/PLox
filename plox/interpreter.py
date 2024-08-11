@@ -12,6 +12,7 @@ from plox.ast.expr_types import (
     This,
     Unary,
     Variable,
+    Super,
 )
 from plox.ast.expr_visitor import ExprVisitor
 from plox.ast.stmt_interface import Stmt
@@ -68,16 +69,28 @@ class Interpreter(ExprVisitor, StmtVisitor):
         if stmt.superclass is not None:
             superclass = self.evaluate(stmt.superclass)
             if not isinstance(superclass, PLoxClass):
-                raise PLoxRuntimeError(stmt.superclass.name, "Superclass must be a class")
+                raise PLoxRuntimeError(
+                    stmt.superclass.name, "Superclass must be a class"
+                )
 
         self.environment.define(stmt.name.lexeme, None)
 
+        if stmt.superclass is not None:
+            self.environment = Environment(self.environment)
+            self.environment.define("super", superclass)
+
         methods: Dict[str, PLoxFunction] = {}
         for method in stmt.methods:
-            function = PLoxFunction(method, self.environment, method.name.lexeme == "init")
+            function = PLoxFunction(
+                method, self.environment, method.name.lexeme == "init"
+            )
             methods[method.name.lexeme] = function
 
         plox_class = PLoxClass(stmt.name.lexeme, superclass, methods)
+
+        if superclass is not None:
+            self.environment = self.environment.enclosing
+
         self.environment.assign(stmt.name, plox_class)
 
     def visit_expression_stmt(self, stmt: Expression):
@@ -152,6 +165,26 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
         object.set(expr.name, value)
         return value
+
+    def visit_super_expr(self, expr: Super) -> Any:
+        distance = self.locals.get(expr)
+
+        assert isinstance(distance, int)
+
+        superclass = self.environment.get_at(distance, "super")
+        object = self.environment.get_at(distance - 1, "this")
+
+        assert isinstance(superclass, PLoxClass)
+        assert isinstance(object, PLoxInstance)
+
+        method = superclass.find_method(expr.method.lexeme)
+
+        if method is None:
+            raise RuntimeError(
+                expr.method, f"Undefined property '{expr.method.lexeme}'."
+            )
+
+        return method.bind(object)
 
     def visit_this_expr(self, expr: This) -> Any:
         return self.lookup_variables(expr.keyword, expr)

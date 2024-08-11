@@ -33,6 +33,8 @@ class ParserErrorType(Enum):
     EXPECTED_METHOD_NAME = "Expected method name"
     EXPECTED_PROPERTY_NAME = "Expected property name"
     MISSING_IDENTIFIER = "Missing identifier"
+    MISSING_DOT_AFTER_SUPER = "Missing dot after super"
+    MISSING_SUPERCLASS_METHOD = "Missing superclass method"
 
 
 class ParserError(Exception):
